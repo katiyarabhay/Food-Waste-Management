@@ -115,6 +115,56 @@ body {
     background: url("money.jpeg");
     height: 30vh;
   }
+  .donation-cardFl{
+    background: url("flo.jpeg");
+    height: 30vh;
+   
+  }
+  .donation-cardP{
+    background-color: #000;
+    color: #000;
+    border: 2px dashed;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .donation-cardR{
+    background-color: #000;
+    color: #000;
+    border: 2px dashed;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .donation-cardF{
+    background-color: #000;
+    color: #000;
+    border: 2px dashed;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .donation-cardFl{
+    background-color: #000;
+    color: #000;
+    border: 2px dashed;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .donation-cardM{
+    background-color: #000;
+    color: #000;
+    border: 2px dashed;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
   .donation-card h3 {
     font-size: 1.5rem;
     color: #333;
@@ -135,9 +185,31 @@ body {
     cursor: pointer;
     font-size: 1rem;
   }
-  
+  .donation-cardM,
+.donation-cardF,
+.donation-cardFl,
+.donation-cardP,
+.donation-cardR {
+    transition: box-shadow 0.3s ease; /* Smooth transition for shadow */
+}
+
+/* Hover effect for all donation cards */
+.donation-cardM:hover,
+.donation-cardF:hover,
+.donation-cardFl:hover,
+.donation-cardP:hover,
+.donation-cardR:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow effect on hover */
+}
   .donation-card button:hover {
     background-color: #218838;
+  }
+  .about{
+      background: beige;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Shadow effect for the contact section */
+      text-align: center
   }
   
   /* Contact Section */
@@ -163,6 +235,53 @@ body {
   .contact-button:hover {
     background-color: #218838;
   }
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+.contact-us {
+    background: teal;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Shadow effect for the contact section */
+    text-align: center;
+}
+
+.contact-us h2 {
+    margin-bottom: 10px;
+}
+
+.contact-us p {
+    margin-bottom: 20px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.icon {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    transition: box-shadow 0.3s ease; /* Smooth transition for shadow */
+}
+
+.icon img {
+    width: 100%;
+    height: auto;
+}
+
+/* Hover effect for icons */
+.icon:hover {
+  background-color: aliceblue;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.9); /* Shadow effect on hover */
+}
   
   /* Footer */
   footer {
