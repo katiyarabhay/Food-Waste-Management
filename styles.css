@@ -25,6 +25,9 @@ body {
     padding: 20px 0;
     text-align: center;
   }
+  .main{
+    background: url("m1.jpeg");
+  }
   
   header h1 {
     margin: 0;
@@ -38,7 +41,7 @@ body {
   
   /* Navigation */
   nav {
-    background-color: #333;
+    background-color:teal;
     padding: 10px 0;
   }
   
@@ -84,8 +87,8 @@ body {
   
   /* Donation Options */
   .donation-options {
-    background:url("vecteezy_light-green-abstract-illustration-like-marble-pattern-and_7262194.jpg");
-    display: grid;
+    /* background:url("vecteezy_light-green-abstract-illustration-like-marble-pattern-and_7262194.jpg");*/
+    display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     grid-gap: 20px;
     margin-top: 20px;
@@ -113,6 +116,8 @@ body {
     height: 30vh;
   }
   .donation-cardM{
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
     background: url("money.jpeg");
     height: 30vh;
   }
