@@ -114,9 +114,8 @@ body {
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     grid-gap: 20px;
-    margin-top: 20px;
+    margin-top:solid
   }
-  
   .donation-card {
       
     background-color: white;
@@ -152,7 +151,7 @@ body {
   .donation-cardP{
     background-color: #000;
     color: #000;
-    border: 2px dashed;
+    border: 2px solid;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
@@ -161,7 +160,7 @@ body {
   .donation-cardR{
     background-color: #000;
     color: #000;
-    border: 2px dashed;
+    border: 2px solid;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
@@ -170,7 +169,7 @@ body {
   .donation-cardF{
     background-color: #000;
     color: #000;
-    border: 2px dashed;
+    border: 2px solid;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
@@ -179,7 +178,7 @@ body {
   .donation-cardFl{
     background-color: #000;
     color: #000;
-    border: 2px dashed;
+    border: 2px solid;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
@@ -188,7 +187,7 @@ body {
   .donation-cardM{
     background-color: #000;
     color: #000;
-    border: 2px dashed;
+    border: 2px solid;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
@@ -229,6 +228,8 @@ body {
 .donation-cardP:hover,
 .donation-cardR:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow effect on hover */
+    background: rgb(34,195,166);
+    background: linear-gradient(0deg, rgba(34,195,166,1) 0%, rgba(77,253,45,1) 100%);
 }
   .donation-card button:hover {
     background-color: #218838;
