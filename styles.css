@@ -355,3 +355,18 @@ body {
 h1{
   font-size: 30px;
 }
+.button-link {
+  padding: 15px 30px;
+  background-color: #3498db; /* Button background color */
+  color: white;
+  display: inline-flex;
+  justify-items: center;
+  text-decoration: none; /* Remove underline */
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+.button-link:hover {
+  background-color: #2980b9; /* Darker shade on hover */
+}
