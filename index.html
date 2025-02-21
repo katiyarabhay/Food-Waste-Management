@@ -14,9 +14,9 @@
       <p class="author">Abhay & Aditi</p>
     </div>
   </header>
-  <nav>
-    <div class="container">
-      <ul>
+  <nav class="navbar">
+    <div class="logo">Menu</div>
+      <ul class="nav-links">
         <li>
           <button class="home" onclick="window.open('#')">
             HOME
@@ -27,6 +27,11 @@
         <li><a href="#about" class="home">ABOUT US</a></li>
       </ul>
     </div>
+    <div class="menu-toggle" id="mobile-menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+  </div>
   </nav>
   <!-- <button class="home">
     Home
@@ -40,7 +45,7 @@
         <div class="donation-options">
           <div class="donation-cardR">
             <h3>FEED RICE</h3>
-            <p>Help us provide rice to those in need.</p>
+            <p>HELP US PROVIDE RICE TO THOSE IN NEED.</p>
             <button class="button-33" onclick="window.open('https://forms.gle/Q8H9nXdtmtryz7d77')">
               Donate Now
           </button>
@@ -72,8 +77,23 @@
             <button class="button-33" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSdxrwuRrosmSdAMil9WnKcHEDUrHjhfJT0DN9LUWb3h-5JwQg/viewform?usp=sharing')">
               Donate Now
           </button>
-          </div>    
-        </div>
+          </div>  
+          <div class="donation-cardS">
+            <h3>DONATE VEGETABLES</h3>
+            <p>FEED VITAMIN AND MINERALS </p>
+            <button class="button-33" onclick="window.open('https://forms.gle/Mu5u7zEVEguyyi3G8')">
+              Donate Now
+          </button> 
+        </div> 
+          <div class="donation-cardV">
+            <h3>DONATE VEGETABLES</h3>
+            <p>FEED VITAMIN AND MINERALS </p>
+            <button class="button-33" onclick="window.open('https://forms.gle/s6mcdCjyGmpzRmm3A')">
+              Donate Now
+          </button> 
+        </div> 
+          </div>
+          </section>
         <section class="about">
         <span id="about"  >  <h2 style="color: teal;">About Us</h2></span>
         <div id="abtus">
@@ -152,5 +172,6 @@ At Apna Community Kitchen , we believe in the power of community and the impact 
   Feedback
 </a>
   </footer>
+  <script src="script.js"></script> 
 </body>
 </html>
