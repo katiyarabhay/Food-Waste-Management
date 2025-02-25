@@ -20,7 +20,7 @@ body {
     justify-content: space-between;
     align-items: center;
     height: 60px; /* Fixed height for the navbar */
-    background-color: #333;
+    background-color: teal;
     padding: 0 20px;
 }
 
@@ -284,6 +284,11 @@ body {
    
   }
   .donation-cardS{
+    background: url("vege.jpeg");
+    height: 30vh;
+   
+  }
+  .donation-cardV{
     background: url("flo.jpeg");
     height: 30vh;
    
@@ -333,7 +338,16 @@ body {
     cursor: pointer;
     font-size: 1rem;
   }
-  .donation-cardS{
+  .donation-cardFr{
+      background-color: #000;
+      color: #000;
+      border: 2px solid teal;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .donation-cardS{
     background-color: #000;
     color: #000;
     border: 2px solid teal;
@@ -342,7 +356,7 @@ body {
     cursor: pointer;
     font-size: 1rem;
   }
-  .donation-cardV{
+    .donation-cardV{
     background-color: #000;
     color: #000;
     border: 2px solid teal;
@@ -375,7 +389,10 @@ body {
 .donation-cardF,
 .donation-cardFl,
 .donation-cardP,
-.donation-cardR {
+.donation-cardR,
+.donation-cardV,
+.donation-cardS,
+.donation-cardFr {
   transition: background-color 1s ease;
   transition: transform 1s ease;
 }
@@ -385,7 +402,10 @@ body {
 .donation-cardF:hover,
 .donation-cardFl:hover,
 .donation-cardP:hover,
-.donation-cardR:hover {
+.donation-cardR:hover, 
+.donation-cardS:hover, 
+.donation-cardV:hover,
+.donation-cardFr:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow effect on hover */
     background-color: rgb(34,195,166);
     background: linear-gradient(0deg, rgba(34,195,166,1) 0%, rgba(77,253,45,1) 100%);
