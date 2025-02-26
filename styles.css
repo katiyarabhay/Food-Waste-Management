@@ -289,9 +289,13 @@ body {
    
   }
   .donation-cardV{
-    background: url("flo.jpeg");
+    background: url("fl.jpeg");
     height: 30vh;
    
+  }
+  .donation-cardFr{
+    background: url("fr.png");
+    height: 30vh;
   }
   .donation-cardP{
     /* background-color: #000; */
