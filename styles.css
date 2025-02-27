@@ -15,6 +15,21 @@ body {
     margin: 0 auto;
     padding: 20px;
   }
+  .head{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color:greenyellow;
+  }
+  .head {
+    box-shadow: inset 0 0 0 0 #54b3d6;
+    color: #54b3d6;
+    margin: 0 -.25rem;
+    padding: 0 .25rem;
+    transition: color .3s ease-in-out, box-shadow .3s ease-in-out;
+  }
+  .head:hover {
+    /* box-shadow: inset 100px 0 0 0 #54b3d6; */
+    color: white;
+  }
   .navbar {
     display: flex;
     justify-content: space-between;
@@ -293,8 +308,8 @@ body {
     height: 30vh;
    
   }
-  .donation-cardFr{
-    background: url("fr.png");
+  .donation-cardFruit{
+    background: url("dd.jpg");
     height: 30vh;
   }
   .donation-cardP{
@@ -342,7 +357,7 @@ body {
     cursor: pointer;
     font-size: 1rem;
   }
-  .donation-cardFr{
+  .donation-cardFruit{
       background-color: #000;
       color: #000;
       border: 2px solid teal;
@@ -396,7 +411,7 @@ body {
 .donation-cardR,
 .donation-cardV,
 .donation-cardS,
-.donation-cardFr {
+.donation-cardFruit {
   transition: background-color 1s ease;
   transition: transform 1s ease;
 }
@@ -409,7 +424,7 @@ body {
 .donation-cardR:hover, 
 .donation-cardS:hover, 
 .donation-cardV:hover,
-.donation-cardFr:hover {
+.donation-cardFruit:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow effect on hover */
     background-color: rgb(34,195,166);
     background: linear-gradient(0deg, rgba(34,195,166,1) 0%, rgba(77,253,45,1) 100%);
@@ -424,11 +439,17 @@ body {
   .about{
       background: beige;
       padding: 20px;
+       /* Padding at the bottom */
       border-radius: 8px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Shadow effect for the contact section */
       text-align: center
   }
-  
+  .donate +.about   {
+    margin-top: 20px; /* Margin between sections */
+}
+  .about +.contact-us   {
+    margin-top: 20px; /* Margin between sections */
+}
   /* Contact Section */
   .contact {
     text-align: center;
