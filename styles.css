@@ -15,13 +15,16 @@ body {
     margin: 0 auto;
     padding: 20px;
   }
+  .home:hover{
+    color: teal;
+  }
   .head{
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     color:greenyellow;
   }
   .head {
     box-shadow: inset 0 0 0 0 #54b3d6;
-    color: #54b3d6;
+    color: teal;
     margin: 0 -.25rem;
     padding: 0 .25rem;
     transition: color .3s ease-in-out, box-shadow .3s ease-in-out;
