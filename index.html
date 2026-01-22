@@ -169,23 +169,23 @@
     </div>
     <script src="https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js"></script>
     <script>
-          window.addEventListener("DOMContentLoaded", func tion         
-        window.AgentInitialize          ({
-          rootId: "JotformAgent-0195004371537b3388de7d2654          9b8a",
-          formID: "0195004371537b3388de7d          a00c9b8a",
-          queryParams: ["skipWelcome=1          ximizable=1"],
-          domain: "htt          /www.jotform.com",
-              isInitialOpen: fals                 isDraggable: false,
-          background: "linear-gradient          g, #C8CEED 0%, #C8CEED 100%)",
-              buttonBackgroundColor: "          1",
-          bu          onColor: "#fff",
-              variant: false,
-              customizations: {
-            greeting: "Yes                   greetin            : "Hi! How can I a          yo        
+      window.addEventListener("DOMContentLoaded", func tion         
+        window.AgentInitialize({
+        rootId: "JotformAgent-0195004371537b3388de7d2654          9b8a",
+        formID: "0195004371537b3388de7d          a00c9b8a",
+        queryParams: ["skipWelcome=1          ximizable=1"],
+        domain: "htt          /www.jotform.com",
+        isInitialOpen: fals                 isDraggable: false,
+        background: "linear-gradient          g, #C8CEED 0%, #C8CEED 100%)",
+        buttonBackgroundColor: "          1",
+        bu          onColor: "#fff",
+        variant: false,
+        customizations: {
+          greeting: "Yes                   greetin            : "Hi! How can I a          yo        
                 pulse: "Yes",
-            position: "right"
-          }
-           });
+          position: "right"
+        }
+      });
     </script>
     <a href="feed.html" class="button-link">
       Feedback
@@ -248,7 +248,22 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+    // Make these available globally so script.js can use them
+    window.firebase = {
+      initializeApp,
+      getFirestore,
+      collection,
+      addDoc
+    };
+  </script>
+  <script src="firebase-config.js" type="module"></script>
+  <script src="script.js" type="module"></script>
 </body>
 
 </html>
