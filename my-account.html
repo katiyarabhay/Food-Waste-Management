@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Apna Community Kitchen</title>
+    <link rel="icon" href="Untitled design (1).png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css"> <!-- Reusing login styles for consistency if needed, or just styles.css -->
+    <style>
+        /* Specific styles for My Account */
+        .account-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .profile-info {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .profile-item {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        #logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+        }
+
+        #logout-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Reusing Header from index.html for consistency -->
+    <nav class="navbar" style="background: #333;">
+        <div class="logo"><a href="index.html" style="color: white; text-decoration: none;">Apna Community Kitchen</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="home">HOME</a></li>
+        </ul>
+    </nav>
+
+    <div class="account-container">
+        <h2>My Account</h2>
+        <div id="loading">Loading profile...</div>
+        <div id="profile-content" style="display: none;">
+            <div class="profile-info">
+                <div class="profile-item">
+                    <span class="label">Email:</span> <span id="user-email"></span>
+                </div>
+                <div class="profile-item">
+                    <span class="label">User ID:</span> <span id="user-uid"></span>
+                </div>
+                <!-- Future: Add display name if available -->
+            </div>
+            <button id="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <script src="my-account.js" type="module"></script>
+</body>
+
+</html>
