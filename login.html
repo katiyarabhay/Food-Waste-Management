@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,24 +9,49 @@
   <!-- Font Awesome CDN link for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
 </head>
+
 <body>
   <div class="wrapper">
     <div class="title"><span>Login Form</span></div>
-    <form action="#">
+
+    <!-- Login Form -->
+    <form action="#" id="login-form">
       <div class="row">
         <i class="fas fa-user"></i>
-        <input type="text" placeholder="Email or Phone" required />
+        <input type="text" id="login-email" placeholder="Email" required />
       </div>
       <div class="row">
         <i class="fas fa-lock"></i>
-        <input type="password" placeholder="Password" required />
+        <input type="password" id="login-password" placeholder="Password" required />
       </div>
       <div class="pass"><a href="#">Forgot password?</a></div>
       <div class="row button">
         <input type="submit" value="Login" />
       </div>
-      <div class="signup-link">Not a member? <a href="#">Signup now</a></div>
+      <div class="signup-link">Not a member? <a href="#" id="show-signup">Signup now</a></div>
+    </form>
+
+    <!-- Signup Form -->
+    <form action="#" id="signup-form" style="display: none;">
+      <div class="row">
+        <i class="fas fa-user"></i>
+        <input type="text" id="signup-name" placeholder="Full Name" required />
+      </div>
+      <div class="row">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="signup-email" placeholder="Email" required />
+      </div>
+      <div class="row">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="signup-password" placeholder="Password" required />
+      </div>
+      <div class="row button">
+        <input type="submit" value="Signup" />
+      </div>
+      <div class="signup-link">Already a member? <a href="#" id="show-login">Login now</a></div>
     </form>
   </div>
+  <script src="login.js" type="module"></script>
 </body>
+
 </html>
