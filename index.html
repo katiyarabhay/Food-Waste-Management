@@ -168,6 +168,7 @@
       <p>&copy; 2025 Apna Community Kitchen. All rights reserved.</p>
     </div>
     <script src="https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js"></script>
+    <!-- 
     <script>
       window.addEventListener("DOMContentLoaded", func tion         
         window.AgentInitialize({
@@ -186,7 +187,8 @@
           position: "right"
         }
       });
-    </script>
+    </script> 
+    -->
     <a href="feed.html" class="button-link">
       Feedback
     </a>
@@ -249,19 +251,8 @@
   </div>
 
   <!-- Firebase SDKs -->
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
-
-    // Make these available globally so script.js can use them
-    window.firebase = {
-      initializeApp,
-      getFirestore,
-      collection,
-      addDoc
-    };
-  </script>
+  <!-- Firebase SDKs -->
+  <!-- Firebase initialization moved to script.js -->
   <script src="firebase-config.js" type="module"></script>
   <script src="script.js" type="module"></script>
 </body>

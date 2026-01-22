@@ -1,11 +1,6 @@
 import firebaseConfig from './firebase-config.js';
-
-// Ensure Firebase SDKs are available
-if (!window.firebase) {
-    console.error("Firebase SDK not loaded from index.html");
-}
-
-const { initializeApp, getDatabase, ref, push, set } = window.firebase;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
