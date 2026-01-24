@@ -17,3 +17,6 @@ const firebaseConfig = {
 
 // Export the config so script.js can use it
 export default firebaseConfig;
+
+// Centralized Admin List
+export const ADMIN_EMAILS = ["abhayakatiyar@gmail.com"];

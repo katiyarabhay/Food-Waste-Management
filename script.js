@@ -1,10 +1,12 @@
-import firebaseConfig from './firebase-config.js';
+import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 // script.js
 const mobileMenu = document.getElementById('mobile-menu');
@@ -22,6 +24,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const donateButtons = document.querySelectorAll('.donate-btn');
     const categorySelect = document.getElementById('category');
     const donationForm = document.getElementById('donation-form');
+
+    // Prefill form for logged-in users & Update Nav
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Admin Link Check
+            if (ADMIN_EMAILS.includes(user.email)) {
+                const myAccountLink = document.querySelector('a[href="my-account.html"]');
+                if (myAccountLink) {
+                    myAccountLink.href = "admin.html";
+                    myAccountLink.textContent = "ADMIN DASHBOARD";
+                }
+            }
+
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+
+            if (nameInput && user.displayName) {
+                nameInput.value = user.displayName;
+            }
+            if (emailInput && user.email) {
+                emailInput.value = user.email;
+            }
+        }
+    });
 
     // Open Modal
     donateButtons.forEach(button => {
@@ -62,6 +88,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add timestamp
         data.timestamp = new Date().toISOString();
+        data.status = "Pending"; // Default status
+
+        // Add User Info if logged in
+        const user = auth.currentUser;
+        if (user) {
+            data.userId = user.uid;
+            // distinct from form email if they typed a different one, but good for tracking
+            data.linkedUserEmail = user.email;
+        }
 
         console.log('Submitting Donation:', data);
 

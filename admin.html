@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Apna Community Kitchen</title>
+    <link rel="icon" href="Untitled design (1).png" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Admin Specific Styles */
+        .admin-container {
+            max-width: 1200px;
+            /* Wider for admin table */
+            margin: 100px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f1f1;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        /* Reusing Table Styles from my-account but ensuring they work here */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .history-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+        }
+
+        /* Status Colors */
+        .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-right: 5px;
+            color: white;
+        }
+
+        .btn-approve {
+            background-color: #2ecc71;
+        }
+
+        .btn-approve:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-reject {
+            background-color: #e74c3c;
+        }
+
+        .btn-reject:hover {
+            background-color: #c0392b;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        /* Dashboard Metrics */
+        .dashboard-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .metric-card h3 {
+            margin-bottom: 10px;
+            color: #777;
+            font-size: 1em;
+            text-transform: uppercase;
+        }
+
+        .metric-card .count {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .metric-card.pending .count {
+            color: orange;
+        }
+
+        .metric-card.received .count {
+            color: #2ecc71;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Reusing Header from index.html -->
+    <nav class="navbar" style="background: #333;">
+        <div class="logo"><a href="index.html" style="color: white; text-decoration: none;">Apna Community Kitchen -
+                Admin</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="home">HOME</a></li>
+            <li><button id="settings-btn"
+                    style="background:none; border:none; color:white; font-size:16px; cursor:pointer; margin-right: 15px;">SETTINGS</button>
+            </li>
+            <li><button id="logout-btn"
+                    style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">LOGOUT</button>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="loading-overlay">Checking Admin Access...</div>
+
+    <div class="admin-container" id="admin-content" style="display: none;">
+        <button id="refresh-btn" class="button-33" style="padding: 8px 16px; font-size: 14px;">Refresh Data</button>
+    </div>
+
+    <div class="dashboard-metrics">
+        <div class="metric-card">
+            <h3>Total Donations</h3>
+            <div class="count" id="count-total">-</div>
+        </div>
+        <div class="metric-card pending">
+            <h3>Pending Actions</h3>
+            <div class="count" id="count-pending">-</div>
+        </div>
+        <div class="metric-card received">
+            <h3>Completed</h3>
+            <div class="count" id="count-received">-</div>
+        </div>
+    </div>
+
+    <div id="table-loading" style="display: none; text-align: center; padding: 20px;">Loading donations...</div>
+
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Donor</th>
+                <th>Contact</th>
+                <th>Category</th>
+                <th>Qty/Amount</th>
+                <th>Address/Message</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="donations-list">
+            <!-- Populated by JS -->
+        </tbody>
+    </table>
+    <p id="no-data-msg" style="display: none; text-align: center; margin-top: 20px; color: #777;">No donations
+        found.</p>
+    </div>
+
+    <!-- Admin Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-btn" id="close-settings">&times;</span>
+            <h2>Admin Settings</h2>
+            <div class="settings-form">
+                <h3>Change Password</h3>
+                <label for="admin-new-password">New Password</label>
+                <input type="password" id="admin-new-password" placeholder="Enter new password (min 6 chars)"
+                    style="width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 4px;">
+
+                <label for="admin-confirm-password">Confirm Password</label>
+                <input type="password" id="admin-confirm-password" placeholder="Confirm new password"
+                    style="width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 4px;">
+
+                <button id="admin-update-password-btn" class="button-33" style="width: 100%;">Update Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="admin.js" type="module"></script>
+</body>
+
+</html>

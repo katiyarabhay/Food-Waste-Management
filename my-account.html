@@ -11,43 +11,118 @@
     <style>
         /* Specific styles for My Account */
         .account-container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 100px auto;
             padding: 30px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
         }
 
-        .profile-info {
-            margin: 20px 0;
+        .section-header {
+            border-bottom: 2px solid #f1f1f1;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
             text-align: left;
         }
 
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
         .profile-item {
-            margin-bottom: 15px;
-            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-size: 1em;
         }
 
         .label {
             font-weight: bold;
             color: #555;
+            display: block;
+            font-size: 0.9em;
         }
 
-        #logout-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
+        /* Tabs or Sections */
+        .account-section {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        /* Table Styles */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .history-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Form Styles */
+        .settings-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1em;
-            margin-top: 20px;
+            border: none;
+            color: white;
+            font-weight: 500;
         }
 
-        #logout-btn:hover {
+        .btn-primary {
+            background-color: #16a085;
+        }
+
+        .btn-primary:hover {
+            background-color: #12876f;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-danger:hover {
             background-color: #c82333;
+        }
+
+        .btn-container {
+            text-align: right;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -66,19 +141,73 @@
         <h2>My Account</h2>
         <div id="loading">Loading profile...</div>
         <div id="profile-content" style="display: none;">
+
+            <div class="section-header">
+                <h3>Profile Details</h3>
+            </div>
+
             <div class="profile-info">
                 <div class="profile-item">
-                    <span class="label">Name:</span> <span id="user-name"></span>
+                    <span class="label">Name</span> <span id="display-name-view"></span>
                 </div>
                 <div class="profile-item">
-                    <span class="label">Email:</span> <span id="user-email"></span>
+                    <span class="label">Email</span> <span id="user-email"></span>
                 </div>
-                <div class="profile-item">
-                    <span class="label">User ID:</span> <span id="user-uid"></span>
-                </div>
-                <!-- Future: Add display name if available -->
             </div>
-            <button id="logout-btn">Logout</button>
+
+            <!-- Profile Settings -->
+            <div class="account-section">
+                <div class="section-header">
+                    <h3>Update Profile</h3>
+                </div>
+                <div class="settings-form">
+                    <label for="update-name">Display Name</label>
+                    <input type="text" id="update-name" placeholder="Enter your full name">
+                    <button id="update-profile-btn" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="account-section">
+                <div class="section-header">
+                    <h3>Security</h3>
+                </div>
+                <div class="settings-form">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" placeholder="Enter new password (min 6 chars)">
+
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" placeholder="Confirm new password">
+
+                    <button id="update-password-btn" class="btn btn-primary">Update Password</button>
+                </div>
+            </div>
+
+            <!-- Donation History -->
+            <div class="account-section">
+                <div class="section-header">
+                    <h3>Donation History</h3>
+                </div>
+                <div id="history-loading">Loading history...</div>
+                <table class="history-table" id="history-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount/Qty</th>
+                            <th>Status.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-list">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+                <p id="no-history-msg" style="display: none; color: #777; margin-top: 10px;">No donations found.</p>
+            </div>
+
+            <div class="btn-container">
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
         </div>
     </div>
 

@@ -1,4 +1,4 @@
-import firebaseConfig from './firebase-config.js';
+import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
@@ -32,6 +32,14 @@ showLoginLink.addEventListener('click', (e) => {
     titleText.textContent = 'Login Form';
 });
 
+function redirectUser(user) {
+    if (ADMIN_EMAILS.includes(user.email)) {
+        window.location.href = "admin.html";
+    } else {
+        window.location.href = "index.html";
+    }
+}
+
 // Handle Login
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -43,9 +51,9 @@ loginForm.addEventListener('submit', async (e) => {
     submitBtn.disabled = true;
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         alert("Login Successful!");
-        window.location.href = "index.html";
+        redirectUser(userCredential.user);
     } catch (error) {
         console.error("Login Error:", error);
         alert("Login Failed: " + error.message);
@@ -71,7 +79,7 @@ signupForm.addEventListener('submit', async (e) => {
         console.log("User created:", userCredential.user);
 
         alert("Signup Successful! Welcome " + name);
-        window.location.href = "index.html";
+        redirectUser(userCredential.user);
     } catch (error) {
         console.error("Signup Error:", error);
         alert("Signup Failed: " + error.message);
@@ -87,7 +95,7 @@ const handleGoogleLogin = async () => {
         const user = result.user;
         console.log("Google Login Successful:", user);
         alert("Google Login Successful! Welcome " + user.displayName);
-        window.location.href = "index.html";
+        redirectUser(user);
     } catch (error) {
         // Handle Errors here.
         const errorCode = error.code;
