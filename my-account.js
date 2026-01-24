@@ -21,6 +21,9 @@ onAuthStateChanged(auth, (user) => {
         userEmailSpan.textContent = user.email;
         userUidSpan.textContent = user.uid;
 
+        const userNameSpan = document.getElementById('user-name');
+        userNameSpan.textContent = user.displayName || "Not Set";
+
         loadingDiv.style.display = 'none';
         profileContentDiv.style.display = 'block';
     } else {

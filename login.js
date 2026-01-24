@@ -1,10 +1,11 @@
 import firebaseConfig from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
 // DOM Elements
 const loginForm = document.getElementById('login-form');
@@ -12,6 +13,9 @@ const signupForm = document.getElementById('signup-form');
 const showSignupLink = document.getElementById('show-signup');
 const showLoginLink = document.getElementById('show-login');
 const titleText = document.querySelector('.title span');
+const googleLoginBtn = document.getElementById('google-login-btn');
+const googleSignupBtn = document.getElementById('google-signup-btn');
+
 
 // Toggle Forms
 showSignupLink.addEventListener('click', (e) => {
@@ -75,6 +79,31 @@ signupForm.addEventListener('submit', async (e) => {
         submitBtn.disabled = false;
     }
 });
+
+// Handle Google Login
+const handleGoogleLogin = async () => {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        console.log("Google Login Successful:", user);
+        alert("Google Login Successful! Welcome " + user.displayName);
+        window.location.href = "index.html";
+    } catch (error) {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Google Login Error:", errorCode, errorMessage);
+        alert("Google Login Failed: " + errorMessage);
+    }
+};
+
+if (googleLoginBtn) {
+    googleLoginBtn.addEventListener('click', handleGoogleLogin);
+}
+
+if (googleSignupBtn) {
+    googleSignupBtn.addEventListener('click', handleGoogleLogin);
+}
 
 // Check Auth State (Optional: Redirect if already logged in)
 onAuthStateChanged(auth, (user) => {
