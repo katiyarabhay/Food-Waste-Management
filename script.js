@@ -140,6 +140,28 @@ document.addEventListener('DOMContentLoaded', () => {
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(pickerMap);
+
+            // Add Search Bar
+            const geocoder = L.Control.geocoder({
+                defaultMarkGeocode: false
+            })
+                .on('markgeocode', function (e) {
+                    const bbox = e.geocode.bbox;
+                    const poly = L.polygon([
+                        bbox.getSouthEast(),
+                        bbox.getNorthEast(),
+                        bbox.getNorthWest(),
+                        bbox.getSouthWest()
+                    ]);
+                    pickerMap.fitBounds(poly.getBounds());
+
+                    const center = e.geocode.center;
+                    pickerMarker.setLatLng(center);
+                    tempLat = center.lat;
+                    tempLng = center.lng;
+                    pickerMarker.bindPopup(e.geocode.name).openPopup();
+                })
+                .addTo(pickerMap);
         } else {
             // Resize trigger
             setTimeout(() => {
