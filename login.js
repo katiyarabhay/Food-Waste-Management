@@ -101,7 +101,16 @@ const handleGoogleLogin = async () => {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.error("Google Login Error:", errorCode, errorMessage);
-        alert("Google Login Failed: " + errorMessage);
+
+        if (errorCode === 'auth/unauthorized-domain') {
+            alert(`DOMAIN ERROR: The domain '${window.location.hostname}' is not authorized.\n\nGo to Firebase Console > Authentication > Settings > Authorized Domains and add this domain.`);
+        } else if (errorCode === 'auth/popup-closed-by-user') {
+            alert("Login cancelled by user.");
+        } else if (errorCode === 'auth/popup-blocked') {
+            alert("Popup blocked! Please allow popups for this site.");
+        } else {
+            alert("Google Login Failed:\n" + errorMessage);
+        }
     }
 };
 

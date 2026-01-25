@@ -9,6 +9,16 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="style.css"> <!-- Reusing login styles for consistency if needed, or just styles.css -->
     <style>
+        /* Reset body styles that might be inherited from style.css (login page styles) */
+        body {
+            display: block !important;
+            height: auto !important;
+            overflow: auto !important;
+            padding: 0 !important;
+            background-color: #f4f7f6 !important;
+            /* Matches --bg-light var */
+        }
+
         /* Specific styles for My Account */
         .account-container {
             max-width: 800px;

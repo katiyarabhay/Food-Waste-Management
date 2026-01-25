@@ -92,13 +92,17 @@ function renderDonationRow(donation) {
     }
 
     const row = document.createElement('tr');
+    const mapBtn = (donation.latitude && donation.longitude)
+        ? `<button class="action-btn" style="background-color: #3498db; margin-top:5px;" onclick="viewLocation('${donation.latitude}', '${donation.longitude}', '${donation.name}')"><i class="fas fa-map-marker-alt"></i> View Map</button>`
+        : '';
+
     row.innerHTML = `
         <td>${date}</td>
         <td>${donation.name || 'Anonymous'}<br><small>${donation.linkedUserEmail || ''}</small></td>
         <td>${donation.phone || '-'}<br>${donation.email || '-'}</td>
         <td>${donation.category}</td>
         <td>${donation.quantity}</td>
-        <td><small>Addr: ${donation.address || '-'}<br>Msg: ${donation.message || '-'}</small></td>
+        <td><small>Addr: ${donation.address || '-'}<br>Msg: ${donation.message || '-'}</small><br>${mapBtn}</td>
         <td><span class="${statusClass}" id="status-${donation.id}">${statusText}</span></td>
         <td>
             <button class="action-btn btn-approve" onclick="updateStatus('${donation.id}', 'Received')">Accept</button>
@@ -132,6 +136,56 @@ refreshBtn.addEventListener('click', loadDonations);
 logoutBtn.addEventListener('click', async () => {
     await signOut(auth);
     window.location.href = "login.html";
+});
+
+// Map Logic
+let map;
+let marker;
+
+window.viewLocation = (lat, lng, name) => {
+    const modal = document.getElementById('map-modal');
+    modal.style.display = 'block';
+
+    if (!map) {
+        map = L.map('map').setView([lat, lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    } else {
+        setTimeout(() => {
+            map.invalidateSize();
+            map.setView([lat, lng], 15);
+        }, 100);
+    }
+
+    if (marker) {
+        map.removeLayer(marker);
+    }
+
+    marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup(`<b>${name}</b><br>Donation Location`)
+        .openPopup();
+
+    // Leaflet needs a moment to resize correctly after modal display
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 100);
+};
+
+// Close Map Modal
+const mapModal = document.getElementById('map-modal');
+const closeMap = document.querySelector('.close-map');
+
+if (closeMap) {
+    closeMap.addEventListener('click', () => {
+        mapModal.style.display = 'none';
+    });
+}
+
+window.addEventListener('click', (e) => {
+    if (e.target === mapModal) {
+        mapModal.style.display = 'none';
+    }
 });
 
 // --- Admin Settings Modal Logic ---

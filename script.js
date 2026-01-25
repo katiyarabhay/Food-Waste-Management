@@ -1,7 +1,7 @@
 import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Prefill form for logged-in users & Update Nav
     onAuthStateChanged(auth, (user) => {
+        const logoutBtn = document.getElementById('logout-btn');
         if (user) {
             // Admin Link Check
             if (ADMIN_EMAILS.includes(user.email)) {
@@ -46,6 +47,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (emailInput && user.email) {
                 emailInput.value = user.email;
             }
+
+            // Show Logout
+            if (logoutBtn) {
+                logoutBtn.style.display = 'block';
+                logoutBtn.parentElement.style.display = 'block'; // Ensure li is visible
+            }
+        } else {
+            // Hide Logout if not logged in
+            if (logoutBtn) {
+                logoutBtn.style.display = 'none';
+                logoutBtn.parentElement.style.display = 'none';
+            }
         }
     });
 
@@ -59,6 +72,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             modal.style.display = 'block';
         });
+
+        // Location Capture
+        const getLocationBtn = document.getElementById('get-location-btn');
+        const locationStatus = document.getElementById('location-status');
+        const latInput = document.getElementById('latitude');
+        const longInput = document.getElementById('longitude');
+
+        if (getLocationBtn) {
+            getLocationBtn.addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    locationStatus.textContent = "Geolocation is not supported by your browser.";
+                    return;
+                }
+
+                locationStatus.textContent = "Locating...";
+                getLocationBtn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        latInput.value = latitude;
+                        longInput.value = longitude;
+
+                        locationStatus.textContent = "Location captured! ✅";
+                        locationStatus.style.color = "green";
+                        getLocationBtn.disabled = false;
+                    },
+                    (error) => {
+                        console.error("Error getting location:", error);
+                        locationStatus.textContent = "Unable to retrieve your location.";
+                        locationStatus.style.color = "red";
+                        getLocationBtn.disabled = false;
+                    }
+                );
+            });
+        }
     });
 
     // Close Modal
@@ -123,4 +174,20 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = false;
         }
     });
+
+    // Logout Functionality
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await signOut(auth);
+                alert("Logged out successfully.");
+                window.location.reload();
+            } catch (error) {
+                console.error("Logout Error:", error);
+                alert("Error logging out.");
+            }
+        });
+    }
 });

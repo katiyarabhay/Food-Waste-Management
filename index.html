@@ -164,7 +164,7 @@
       <ul>
         <li><a href="#">Weekly Goals</a></li>
         <li><a href="https://forms.gle/n1SHshKTgDEpqzYL7">Help Centre</a></li>
-        <li><a href="#">Logout</a></li>
+        <li><a href="#" id="logout-btn">Logout</a></li>
       </ul>
       <p>&copy; 2025 Apna Community Kitchen. All rights reserved.</p>
     </div>
@@ -239,6 +239,13 @@
         <div class="form-group">
           <label for="address">Pickup Address (if applicable)</label>
           <textarea id="address" name="address" rows="2" placeholder="Enter pickup address"></textarea>
+          <button type="button" id="get-location-btn" class="button-33"
+            style="width: auto; margin-top: 10px; font-size: 0.9em; padding: 5px 15px;">
+            📍 Share My Current Location
+          </button>
+          <span id="location-status" style="font-size: 0.8em; margin-left: 10px; color: #666;"></span>
+          <input type="hidden" id="latitude" name="latitude">
+          <input type="hidden" id="longitude" name="longitude">
         </div>
 
         <div class="form-group">

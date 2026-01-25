@@ -144,6 +144,54 @@
             color: #2ecc71;
         }
     </style>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        /* Map Modal Styles */
+        #map-modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        #map-container {
+            position: relative;
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            height: 80%;
+            border-radius: 8px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .close-map {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #333;
+            font-size: 30px;
+            font-weight: bold;
+            z-index: 4000;
+            cursor: pointer;
+            background: white;
+            padding: 0 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -228,6 +276,17 @@
     </div>
 
     <!-- Firebase SDKs -->
+    <!-- Map Modal -->
+    <div id="map-modal">
+        <div id="map-container">
+            <span class="close-map">&times;</span>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="admin.js" type="module"></script>
 </body>
 
