@@ -95,12 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const longitude = position.coords.longitude;
                         const accuracy = position.coords.accuracy;
 
-                        latInput.value = latitude;
-                        longInput.value = longitude;
-
-                        locationStatus.textContent = `Location captured! ✅ (Accuracy: within ${Math.round(accuracy)}m)`;
-                        locationStatus.style.color = "green";
-                        getLocationBtn.disabled = false;
+                        // Open Map Modal for Confirmation
+                        openLocationPicker(latitude, longitude, accuracy);
                     },
                     (error) => {
                         console.error("Error getting location:", error);
@@ -121,6 +117,78 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // Location Picker Logic
+    let pickerMap;
+    let pickerMarker;
+    let tempLat, tempLng;
+    const locationModal = document.getElementById('location-modal');
+    const confirmBtn = document.getElementById('confirm-location-btn');
+    const cancelBtn = document.getElementById('cancel-location-btn');
+    const locationStatus = document.getElementById('location-status');
+    const latInput = document.getElementById('latitude');
+    const longInput = document.getElementById('longitude');
+    const getLocationBtn = document.getElementById('get-location-btn');
+
+    function openLocationPicker(lat, lng, accuracy) {
+        locationModal.style.display = 'block';
+        tempLat = lat;
+        tempLng = lng;
+
+        if (!pickerMap) {
+            pickerMap = L.map('location-map').setView([lat, lng], 18);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(pickerMap);
+        } else {
+            // Resize trigger
+            setTimeout(() => {
+                pickerMap.invalidateSize();
+                pickerMap.setView([lat, lng], 18);
+            }, 100);
+        }
+
+        if (pickerMarker) {
+            pickerMap.removeLayer(pickerMarker);
+        }
+
+        pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap)
+            .bindPopup("Drag me to your exact location")
+            .openPopup();
+
+        // Update temp coords on drag
+        pickerMarker.on('dragend', function (event) {
+            const position = pickerMarker.getLatLng();
+            tempLat = position.lat;
+            tempLng = position.lng;
+        });
+
+        // Resize map again just in case
+        setTimeout(() => {
+            pickerMap.invalidateSize();
+        }, 200);
+    }
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+            latInput.value = tempLat;
+            longInput.value = tempLng;
+
+            locationStatus.textContent = `Location confirmed! ✅`;
+            locationStatus.style.color = "green";
+            getLocationBtn.disabled = false;
+            locationModal.style.display = 'none';
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            locationModal.style.display = 'none';
+            getLocationBtn.disabled = false;
+            locationStatus.textContent = "Location selection cancelled.";
+            locationStatus.style.color = "orange";
+        });
+    }
 
     // Close Modal
     closeBtn.addEventListener('click', () => {
