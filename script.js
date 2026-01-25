@@ -93,19 +93,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     (position) => {
                         const latitude = position.coords.latitude;
                         const longitude = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
 
                         latInput.value = latitude;
                         longInput.value = longitude;
 
-                        locationStatus.textContent = "Location captured! ✅";
+                        locationStatus.textContent = `Location captured! ✅ (Accuracy: within ${Math.round(accuracy)}m)`;
                         locationStatus.style.color = "green";
                         getLocationBtn.disabled = false;
                     },
                     (error) => {
                         console.error("Error getting location:", error);
-                        locationStatus.textContent = "Unable to retrieve your location.";
+                        let errorMsg = "Unable to retrieve your location.";
+                        if (error.code === error.PERMISSION_DENIED) errorMsg = "Location permission denied.";
+                        else if (error.code === error.TIMEOUT) errorMsg = "Location request timed out.";
+
+                        locationStatus.textContent = errorMsg;
                         locationStatus.style.color = "red";
                         getLocationBtn.disabled = false;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
                     }
                 );
             });
