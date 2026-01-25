@@ -142,26 +142,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }).addTo(pickerMap);
 
             // Add Search Bar
-            const geocoder = L.Control.geocoder({
-                defaultMarkGeocode: false
-            })
-                .on('markgeocode', function (e) {
-                    const bbox = e.geocode.bbox;
-                    const poly = L.polygon([
-                        bbox.getSouthEast(),
-                        bbox.getNorthEast(),
-                        bbox.getNorthWest(),
-                        bbox.getSouthWest()
-                    ]);
-                    pickerMap.fitBounds(poly.getBounds());
-
-                    const center = e.geocode.center;
-                    pickerMarker.setLatLng(center);
-                    tempLat = center.lat;
-                    tempLng = center.lng;
-                    pickerMarker.bindPopup(e.geocode.name).openPopup();
+            try {
+                const geocoder = L.Control.geocoder({
+                    defaultMarkGeocode: false
                 })
-                .addTo(pickerMap);
+                    .on('markgeocode', function (e) {
+                        const bbox = e.geocode.bbox;
+                        const poly = L.polygon([
+                            bbox.getSouthEast(),
+                            bbox.getNorthEast(),
+                            bbox.getNorthWest(),
+                            bbox.getSouthWest()
+                        ]);
+                        pickerMap.fitBounds(poly.getBounds());
+
+                        const center = e.geocode.center;
+                        pickerMarker.setLatLng(center);
+                        tempLat = center.lat;
+                        tempLng = center.lng;
+                        pickerMarker.bindPopup(e.geocode.name).openPopup();
+                    })
+                    .addTo(pickerMap);
+                console.log("Geocoder search bar added to map.");
+            } catch (err) {
+                console.error("Failed to add Geocoder:", err);
+            }
         } else {
             // Resize trigger
             setTimeout(() => {
