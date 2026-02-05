@@ -1,0 +1,361 @@
+import firebaseConfig from './firebase-config.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getDatabase, ref, query, orderByChild, equalTo, get, update, set, remove } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// Global Error Handler for debugging
+window.onerror = function (message, source, lineno, colno, error) {
+    console.error("Global Error:", message);
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.top = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.right = '0';
+    errorDiv.style.background = '#e74c3c';
+    errorDiv.style.color = 'white';
+    errorDiv.style.padding = '10px';
+    errorDiv.style.zIndex = '9999';
+    errorDiv.style.textAlign = 'center';
+    errorDiv.style.fontWeight = 'bold';
+    errorDiv.innerText = `System Error: ${message}`;
+    document.body.appendChild(errorDiv);
+};
+
+// DOM Elements
+const loadingOverlay = document.getElementById('loading-overlay');
+const dashboardContent = document.getElementById('dashboard-content');
+const pendingContainer = document.getElementById('pending-tasks-container');
+const completedContainer = document.getElementById('completed-tasks-container');
+const noTasksMsg = document.getElementById('no-tasks-msg');
+const noHistoryMsg = document.getElementById('no-history-msg');
+const logoutBtn = document.getElementById('logout-btn');
+const refreshBtn = document.getElementById('refresh-btn');
+const mapModal = document.getElementById('map-modal');
+const closeMapBtn = document.querySelector('.close-map');
+
+// State
+let currentUser = null;
+let currentTrackingId = null;
+let watchId = null;
+let map = null;
+let mapMarker = null;
+let destinationMarker = null;
+
+// Auth Check
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        // Check if user has delivery role
+        try {
+            loadingOverlay.innerText = "Verifying Profile...";
+            const userRef = ref(db, `users/${user.uid}`);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+
+                if (userData.role === 'delivery' || userData.role === 'admin') {
+                    loadingOverlay.style.display = 'none';
+                    dashboardContent.style.display = 'block';
+                    loadAssignedDeliveries();
+                } else if (userData.role === 'pending_delivery') {
+                    loadingOverlay.innerHTML = "<div style='text-align:center;'><h3>Approval Pending</h3><p>Your Delivery Partner account is awaiting Admin approval.</p><button onclick='location.reload()' style='margin-top:10px; padding:5px 10px;'>Check Again</button> <button onclick='document.getElementById(\"logout-btn\").click()' style='margin-top:10px; padding:5px 10px;'>Logout</button></div>";
+                } else {
+                    alert("Access Denied: You are not a registered Delivery Partner.");
+                    window.location.href = "index.html";
+                }
+            } else {
+                alert("Access Denied: User profile not found.");
+                window.location.href = "index.html";
+            }
+        } catch (e) {
+            console.error("Profile Load Error", e);
+            loadingOverlay.innerHTML = `<p style='color:red;'>Error loading profile: ${e.message}</p>`;
+        }
+    } else {
+        window.location.href = "login.html";
+    }
+});
+
+// Load Deliveries
+async function loadAssignedDeliveries() {
+    if (!pendingContainer) return;
+
+    pendingContainer.innerHTML = '<p style="text-align:center;">Loading...</p>';
+    completedContainer.innerHTML = '';
+    noTasksMsg.style.display = 'none';
+    noHistoryMsg.style.display = 'none';
+
+    try {
+        const donationsRef = ref(db, 'donations');
+        const snapshot = await get(donationsRef);
+
+        pendingContainer.innerHTML = ''; // Clear loading text
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const donations = Object.entries(data).map(([key, val]) => ({ id: key, ...val }));
+
+            const myAssigned = donations.filter(d => d.assignedTo === currentUser.uid);
+
+            const pendingTasks = myAssigned.filter(d =>
+                !d.status || ['assigned', 'in progress'].includes(d.status.toLowerCase())
+            );
+
+            const completedTasks = myAssigned.filter(d =>
+                d.status && ['received', 'completed', 'confirmed'].includes(d.status.toLowerCase())
+            );
+
+            // Render Pending
+            if (pendingTasks.length > 0) {
+                pendingTasks.forEach(task => {
+                    const card = renderTaskCard(task);
+                    pendingContainer.appendChild(card);
+                });
+            } else {
+                noTasksMsg.style.display = 'block';
+            }
+
+            // Render Completed
+            if (completedTasks.length > 0) {
+                completedTasks.forEach(task => {
+                    const card = renderTaskCard(task, true); // true for history
+                    completedContainer.appendChild(card);
+                });
+            } else {
+                noHistoryMsg.style.display = 'block';
+            }
+
+        } else {
+            noTasksMsg.style.display = 'block';
+            noHistoryMsg.style.display = 'block';
+        }
+    } catch (error) {
+        console.error("Error loading tasks:", error);
+        pendingContainer.innerHTML = `<p style="text-align:center; color:red;">Error loading tasks: ${error.message}</p>`;
+    }
+}
+
+// Render Task Card
+function renderTaskCard(task, isHistory = false) {
+    const card = document.createElement('div');
+    card.className = 'task-card';
+    if (task.status === 'In Progress') card.classList.add('tracking-active');
+
+    const isStarted = task.status === 'In Progress';
+
+    let actionBtn = '';
+    if (!isHistory) {
+        actionBtn = !isStarted ?
+            `<button class="btn-action btn-start" onclick="window.startDelivery('${task.id}')">Start Pickup</button>` :
+            `<button class="btn-action btn-complete" onclick="window.completeDelivery('${task.id}')">Complete Pickup</button>`;
+    } else {
+        actionBtn = `<span style="color: green; font-weight: bold;">✓ Completed</span>`;
+    }
+
+    // Map Button Logic (Safe check)
+    let mapBtn = '';
+    if (task.latitude && task.longitude) {
+        mapBtn = `<a href="#" class="view-map-link" data-lat="${task.latitude}" data-lng="${task.longitude}">View on Map</a>`;
+    }
+
+    card.innerHTML = `
+        <div class="task-header">
+            <h3>${task.category}</h3>
+            <span class="status-badge ${task.status === 'In Progress' ? 'status-completed' : 'status-pending'}">${task.status || 'Assigned'}</span>
+        </div>
+        <div class="task-details">
+            <div class="detail-item">
+                <strong>Donor Name</strong>
+                ${task.name || 'Anonymous'}
+            </div>
+            <div class="detail-item">
+                <strong>Quantity</strong>
+                ${task.quantity}
+            </div>
+            <div class="detail-item">
+                <strong>Address</strong>
+                ${task.address || 'N/A'} <br>
+                ${mapBtn}
+            </div>
+             <div class="detail-item">
+                <strong>Contact</strong>
+                ${task.phone || 'N/A'}
+            </div>
+        </div>
+        <div class="task-actions">
+            ${actionBtn}
+        </div>
+    `;
+
+    // Add event listeners for map links
+    const mapLink = card.querySelector('.view-map-link');
+    if (mapLink) {
+        mapLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const lat = parseFloat(mapLink.dataset.lat);
+            const lng = parseFloat(mapLink.dataset.lng);
+            openMap(lat, lng);
+        });
+    }
+
+    return card;
+}
+
+// Global functions for buttons
+window.startDelivery = async (donationId) => {
+    if (!confirm("Start this delivery? This will enable live tracking for the user.")) return;
+
+    try {
+        await update(ref(db, `donations/${donationId}`), {
+            status: 'In Progress',
+            startTime: Date.now()
+        });
+
+        startLocationTracking(donationId);
+        loadAssignedDeliveries();
+    } catch (error) {
+        alert("Error starting delivery: " + error.message);
+    }
+};
+
+window.completeDelivery = async (donationId) => {
+    if (!confirm("Confirm delivery completion?")) return;
+
+    try {
+        await update(ref(db, `donations/${donationId}`), {
+            status: 'Completed',
+            completedTime: Date.now()
+        });
+
+        stopLocationTracking();
+        loadAssignedDeliveries();
+    } catch (error) {
+        alert("Error completing delivery: " + error.message);
+    }
+};
+
+// Location Tracking
+function startLocationTracking(donationId) {
+    if ("geolocation" in navigator) {
+        currentTrackingId = donationId;
+
+        // Update immediately
+        navigator.geolocation.getCurrentPosition(updateLocationOnDb, handleError);
+
+        // Watch for changes
+        watchId = navigator.geolocation.watchPosition(updateLocationOnDb, handleError, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        });
+
+        alert("Live tracking started. Location is being shared.");
+    } else {
+        alert("Geolocation is not supported by your browser.");
+    }
+}
+
+function updateLocationOnDb(position) {
+    if (!currentUser) return;
+
+    const { latitude, longitude } = position.coords;
+
+    // Update location under locations/{userId}
+    set(ref(db, `locations/${currentUser.uid}`), {
+        lat: latitude,
+        lng: longitude,
+        timestamp: Date.now(),
+        activeTask: currentTrackingId
+    });
+}
+
+function stopLocationTracking() {
+    if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+
+    if (currentUser) {
+        // Remove location or mark inactive
+        remove(ref(db, `locations/${currentUser.uid}`));
+    }
+
+    currentTrackingId = null;
+}
+
+function handleError(error) {
+    console.warn("Geolocation warning:", error.message);
+}
+
+
+// Map Logic
+function openMap(lat, lng) {
+    if (!mapModal) return;
+    mapModal.style.display = 'block';
+
+    if (!map) {
+        map = L.map('map').setView([lat, lng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+    } else {
+        map.invalidateSize();
+        map.setView([lat, lng], 13);
+    }
+
+    if (destinationMarker) {
+        map.removeLayer(destinationMarker);
+    }
+
+    destinationMarker = L.marker([lat, lng]).addTo(map)
+        .bindPopup("Donor Location")
+        .openPopup();
+
+    // Also show my location if available
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            const { latitude, longitude } = pos.coords;
+            if (mapMarker) map.removeLayer(mapMarker);
+
+            mapMarker = L.marker([latitude, longitude], {
+                icon: L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3304/3304567.png', // Courier icon
+                    iconSize: [38, 38],
+                    iconAnchor: [19, 38]
+                })
+            }).addTo(map).bindPopup("You");
+
+            // Fit bounds
+            const group = new L.featureGroup([destinationMarker, mapMarker]);
+            map.fitBounds(group.getBounds());
+        }, (err) => console.log("No location for map center"));
+    }
+}
+
+
+// Close functions
+if (closeMapBtn) closeMapBtn.onclick = () => mapModal.style.display = "none";
+window.onclick = (event) => {
+    if (event.target == mapModal) mapModal.style.display = "none";
+};
+
+// Logout
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = "login.html";
+        } catch (e) {
+            console.error("Logout error", e);
+            window.location.href = "login.html";
+        }
+    });
+}
+
+if (refreshBtn) refreshBtn.addEventListener('click', loadAssignedDeliveries);

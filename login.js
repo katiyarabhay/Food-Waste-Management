@@ -1,11 +1,37 @@
 import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
 const googleProvider = new GoogleAuthProvider();
+
+// Custom function to write user data
+async function saveUserProfile(user, additionalData = {}) {
+    const userRef = ref(db, 'users/' + user.uid);
+    try {
+        const snapshot = await get(userRef);
+        if (!snapshot.exists()) {
+            await set(userRef, {
+                email: user.email,
+                name: user.displayName || additionalData.name || 'Anonymous',
+                role: additionalData.role || 'user', // Default role
+                createdAt: Date.now(),
+                ...additionalData
+            });
+            console.log("User profile created in DB.");
+        } else {
+            // Optional: Update last login?
+            console.log("User profile exists.");
+        }
+    } catch (e) {
+        console.error("Error saving user profile:", e);
+    }
+}
+
 
 // DOM Elements
 const loginForm = document.getElementById('login-form');
@@ -32,12 +58,28 @@ showLoginLink.addEventListener('click', (e) => {
     titleText.textContent = 'Login Form';
 });
 
-function redirectUser(user) {
+async function redirectUser(user) {
     if (ADMIN_EMAILS.includes(user.email)) {
         window.location.href = "admin.html";
-    } else {
-        window.location.href = "index.html";
+        return;
     }
+
+    try {
+        const userRef = ref(db, 'users/' + user.uid);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            if (userData.role === 'delivery') {
+                window.location.href = "delivery.html";
+                return;
+            }
+        }
+    } catch (e) {
+        console.error("Error fetching user role for redirect:", e);
+    }
+
+    // Default to index.html for 'user' or errors
+    window.location.href = "index.html";
 }
 
 // Handle Login
@@ -68,6 +110,9 @@ signupForm.addEventListener('submit', async (e) => {
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
     const name = document.getElementById('signup-name').value;
+    const isPartner = document.getElementById('signup-partner').checked;
+    const role = isPartner ? 'pending_delivery' : 'user';
+
     const submitBtn = signupForm.querySelector('input[type="submit"]');
 
     submitBtn.value = "Signing up...";
@@ -75,11 +120,21 @@ signupForm.addEventListener('submit', async (e) => {
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // You can save the 'name' to the database or update profile here if needed
+        // Save to DB
+        await saveUserProfile(userCredential.user, { name: name, role: role });
         console.log("User created:", userCredential.user);
 
-        alert("Signup Successful! Welcome " + name);
-        redirectUser(userCredential.user);
+        if (role === 'pending_delivery') {
+            alert("Signup Successful! Your request to become a Delivery Partner is pending Admin approval.");
+            await signOut(auth); // Force logout so they can't login until approved or they login as regular user (optional logic)
+            // Actually, let's redirect them to a nice page or back to login? 
+            // Or let them login but show restricted access on delivery page.
+            // Let's redirect to index, but if they try to access delivery it will block.
+            window.location.href = "index.html";
+        } else {
+            alert("Signup Successful! Welcome " + name);
+            redirectUser(userCredential.user);
+        }
     } catch (error) {
         console.error("Signup Error:", error);
         alert("Signup Failed: " + error.message);
@@ -93,6 +148,10 @@ const handleGoogleLogin = async () => {
     try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
+
+        // Save to DB
+        await saveUserProfile(user);
+
         console.log("Google Login Successful:", user);
         alert("Google Login Successful! Welcome " + user.displayName);
         redirectUser(user);

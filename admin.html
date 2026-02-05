@@ -223,45 +223,98 @@
     <div id="loading-overlay">Checking Admin Access...</div>
 
     <div class="admin-container" id="admin-content" style="display: none;">
-        <button id="refresh-btn" class="button-33" style="padding: 8px 16px; font-size: 14px;">Refresh Data</button>
-    </div>
-
-    <div class="dashboard-metrics">
-        <div class="metric-card">
-            <h3>Total Donations</h3>
-            <div class="count" id="count-total">-</div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px;">
+            <button id="view-donations-btn" class="button-33"
+                style="padding: 8px 16px; font-size: 14px; background-color: #333; color: white;">Donations</button>
+            <button id="view-partners-btn" class="button-33"
+                style="padding: 8px 16px; font-size: 14px;">Partners</button>
+            <button id="refresh-btn" class="button-33" style="padding: 8px 16px; font-size: 14px;">Refresh Data</button>
         </div>
-        <div class="metric-card pending">
-            <h3>Pending Actions</h3>
-            <div class="count" id="count-pending">-</div>
-        </div>
-        <div class="metric-card received">
-            <h3>Completed</h3>
-            <div class="count" id="count-received">-</div>
-        </div>
-    </div>
 
-    <div id="table-loading" style="display: none; text-align: center; padding: 20px;">Loading donations...</div>
+        <div id="donations-section">
+            <div class="dashboard-metrics">
+                <div class="metric-card">
+                    <h3>Total Donations</h3>
+                    <div class="count" id="count-total">-</div>
+                </div>
+                <div class="metric-card pending">
+                    <h3>Pending Actions</h3>
+                    <div class="count" id="count-pending">-</div>
+                </div>
+                <div class="metric-card received">
+                    <h3>Completed</h3>
+                    <div class="count" id="count-received">-</div>
+                </div>
+            </div>
 
-    <table class="history-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Donor</th>
-                <th>Contact</th>
-                <th>Category</th>
-                <th>Qty/Amount</th>
-                <th>Address/Message</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="donations-list">
-            <!-- Populated by JS -->
-        </tbody>
-    </table>
-    <p id="no-data-msg" style="display: none; text-align: center; margin-top: 20px; color: #777;">No donations
-        found.</p>
+            <div id="table-loading" style="display: none; text-align: center; padding: 20px;">Loading donations...</div>
+
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Donor</th>
+                        <th>Contact</th>
+                        <th>Category</th>
+                        <th>Qty/Amount</th>
+                        <th>Address/Message</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="donations-list">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+            <p id="no-data-msg" style="display: none; text-align: center; margin-top: 20px; color: #777;">No donations
+                found.</p>
+        </div>
+
+        <div id="partners-section" style="display: none;">
+            <h3>Manage Delivery Partners</h3>
+
+            <div id="pending-section" style="margin-bottom: 30px; display: none;">
+                <h4 style="color: orange;">Pending Approvals</h4>
+                <table class="history-table" style="border: 1px solid orange;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-list">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-bottom: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                <h4>Add New Partner</h4>
+                <div style="display: flex; gap: 10px;">
+                    <input type="email" id="new-partner-email" placeholder="Enter User Email"
+                        style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <button id="add-partner-btn" class="button-33">Promote User</button>
+                </div>
+            </div>
+
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="partners-list">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+            <p id="no-partners-msg" style="display: none; text-align: center; margin-top: 20px; color: #777;">No
+                delivery partners found.</p>
+        </div>
     </div>
 
     <!-- Admin Settings Modal -->
@@ -285,6 +338,19 @@
     </div>
 
     <!-- Firebase SDKs -->
+    <!-- Assignment Modal -->
+    <div id="assignment-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-btn" id="close-assignment">&times;</span>
+            <h3>Assign Delivery Partner</h3>
+            <p>Select a partner for this donation:</p>
+            <div id="assignment-list" style="margin-top: 15px; max-height: 300px; overflow-y: auto;">
+                <!-- List will be populated -->
+            </div>
+            <input type="hidden" id="assign-donation-id">
+        </div>
+    </div>
+
     <!-- Map Modal -->
     <div id="map-modal">
         <div id="map-container">

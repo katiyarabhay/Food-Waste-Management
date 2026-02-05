@@ -1,6 +1,6 @@
 import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
 // Initialize Firebase
@@ -25,12 +25,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySelect = document.getElementById('category');
     const donationForm = document.getElementById('donation-form');
 
-    // Prefill form for logged-in users & Update Nav
-    onAuthStateChanged(auth, (user) => {
+    // Prefill form and Redirect Logic
+    onAuthStateChanged(auth, async (user) => {
         const logoutBtn = document.getElementById('logout-btn');
         if (user) {
+            // Check User Role for Redirection
+            try {
+                const userRef = ref(db, `users/${user.uid}`);
+                const snapshot = await get(userRef);
+
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    if (userData.role === 'delivery') {
+                        // Redirect to Delivery Dashboard
+                        window.location.href = "delivery.html";
+                        return; // Stop further execution
+                    } else if (userData.role === 'pending_delivery') {
+                        console.log("User is pending delivery approval.");
+                        // Optional: Alert the user?
+                        // alert("Your delivery partner account is pending approval.");
+                    }
+                }
+            } catch (e) {
+                console.error("Role check error", e);
+            }
+
             // Admin Link Check
             if (ADMIN_EMAILS.includes(user.email)) {
+                // ... (existing admin logic)
                 const myAccountLink = document.querySelector('a[href="my-account.html"]');
                 if (myAccountLink) {
                     myAccountLink.href = "admin.html";
@@ -38,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // ... (rest of prefill)
             const nameInput = document.getElementById('name');
             const emailInput = document.getElementById('email');
 
@@ -51,10 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show Logout
             if (logoutBtn) {
                 logoutBtn.style.display = 'block';
-                logoutBtn.parentElement.style.display = 'block'; // Ensure li is visible
+                logoutBtn.parentElement.style.display = 'block';
             }
         } else {
-            // Hide Logout if not logged in
+            // ... (existing else)
             if (logoutBtn) {
                 logoutBtn.style.display = 'none';
                 logoutBtn.parentElement.style.display = 'none';

@@ -1,7 +1,7 @@
 import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-import { getDatabase, ref, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getDatabase, ref, query, orderByChild, equalTo, get, onValue, off } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -24,6 +24,14 @@ const historyLoading = document.getElementById('history-loading');
 const historyTable = document.getElementById('history-table');
 const historyList = document.getElementById('history-list');
 const noHistoryMsg = document.getElementById('no-history-msg');
+
+// Tracking Map Elements
+const mapModal = document.getElementById('map-modal');
+const closeMapBtn = document.querySelector('.close-map');
+const trackStatusSpan = document.getElementById('track-status');
+let mapInstance = null;
+let markerInstance = null;
+let currentTrackingRef = null;
 
 
 // Check Auth State
@@ -68,7 +76,7 @@ async function loadDonationHistory(email) {
 
         if (snapshot.exists()) {
             const data = snapshot.val();
-            const donations = Object.values(data);
+            const donations = Object.entries(data).map(([key, val]) => ({ id: key, ...val }));
 
             // Filter by email or userId
             const userDonations = donations.filter(donation => {
@@ -87,15 +95,22 @@ async function loadDonationHistory(email) {
                     // Determine Status and Class
                     let statusText = donation.status || "Submitted";
                     let statusClass = "status-pending"; // Default orange
+                    let actionHtml = "";
 
                     // Normalize for comparison
                     const lowerStatus = statusText.toLowerCase();
 
                     if (lowerStatus === 'received' || lowerStatus === 'confirmed' || lowerStatus === 'completed') {
                         statusClass = "status-completed"; // Green
-                        statusText = "Received"; // Standardize display text if desired, or keep original: donation.status
+                        statusText = "Received";
                     } else if (lowerStatus === 'rejected' || lowerStatus === 'cancelled') {
-                        statusClass = "status-rejected"; // Add red style if needed, reusing danger color or new one
+                        statusClass = "status-rejected";
+                    } else if (lowerStatus === 'in progress') {
+                        statusClass = "status-completed"; // Re-use green or create blue
+                        statusText = "In Progress";
+                        if (donation.assignedTo) {
+                            actionHtml = `<button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8em;" onclick="window.trackDonation('${donation.assignedTo}')">Track Live</button>`;
+                        }
                     }
 
                     const row = document.createElement('tr');
@@ -103,7 +118,10 @@ async function loadDonationHistory(email) {
                         <td>${date}</td>
                         <td>${donation.category}</td>
                         <td>${donation.quantity}</td>
-                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            <span class="${statusClass}">${statusText}</span>
+                            ${actionHtml}
+                        </td>
                     `;
                     historyList.appendChild(row);
                 });
@@ -125,6 +143,66 @@ async function loadDonationHistory(email) {
         historyLoading.style.display = 'none';
     }
 }
+
+
+// --- Tracking Logic ---
+window.trackDonation = (assignedPartnerUid) => {
+    mapModal.style.display = 'block';
+    trackStatusSpan.innerText = "Connecting to partner...";
+
+    // Initialize Map
+    if (!mapInstance) {
+        mapInstance = L.map('track-map').setView([20.5937, 78.9629], 5); // Default India view
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(mapInstance);
+    }
+
+    // Subscribe to location updates
+    const locRef = ref(db, `locations/${assignedPartnerUid}`);
+    currentTrackingRef = locRef; // Save ref to unsubscribe later
+
+    onValue(locRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const { lat, lng, timestamp } = data;
+
+            // Update Marker
+            if (markerInstance) {
+                markerInstance.setLatLng([lat, lng]);
+            } else {
+                markerInstance = L.marker([lat, lng], {
+                    icon: L.icon({
+                        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3304/3304567.png',
+                        iconSize: [38, 38],
+                        iconAnchor: [19, 38]
+                    })
+                }).addTo(mapInstance).bindPopup("Your Delivery Hero");
+            }
+
+            // Center Map
+            mapInstance.setView([lat, lng], 15);
+            trackStatusSpan.innerText = `Updating Live... Last seen: ${new Date(timestamp).toLocaleTimeString()}`;
+
+        } else {
+            trackStatusSpan.innerText = "Partner location not available (Offline or GPS off)";
+        }
+    });
+};
+
+// Close Map & Cleanup
+const closeMap = () => {
+    mapModal.style.display = 'none';
+    if (currentTrackingRef) {
+        off(currentTrackingRef); // Unsubscribe
+        currentTrackingRef = null;
+    }
+};
+
+if (closeMapBtn) closeMapBtn.onclick = closeMap;
+window.onclick = (e) => {
+    if (e.target == mapModal) closeMap();
+};
 
 
 // Handle Logout
