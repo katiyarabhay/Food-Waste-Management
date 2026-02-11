@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Dashboard - Apna Community Kitchen</title>
+    <title>Delivery Dashboard - HappiPlates</title>
     <link rel="icon" href="Untitled design (1).png" type="image/x-icon">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="style.css">
@@ -190,8 +190,17 @@
 
     <div class="delivery-container" id="dashboard-content" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>Your Assigned Deliveries</h2>
+            <h2>Delivery Dashboard</h2>
             <button id="refresh-btn" class="button-33" style="padding: 8px 16px;">Refresh</button>
+        </div>
+
+        <!-- Available Section -->
+        <div class="delivery-section">
+            <h3 style="border-bottom: 2px solid #3498db; padding-bottom: 5px;">Available for Pickup</h3>
+            <div id="available-tasks-container">
+                <!-- Available Cards -->
+                <p id="no-available-msg" style="display: none; color: #777;">No new requests available.</p>
+            </div>
         </div>
 
         <!-- Pending Collections Section -->

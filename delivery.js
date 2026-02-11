@@ -29,67 +29,30 @@ window.onerror = function (message, source, lineno, colno, error) {
 // DOM Elements
 const loadingOverlay = document.getElementById('loading-overlay');
 const dashboardContent = document.getElementById('dashboard-content');
+const availableContainer = document.getElementById('available-tasks-container');
 const pendingContainer = document.getElementById('pending-tasks-container');
 const completedContainer = document.getElementById('completed-tasks-container');
+const noAvailableMsg = document.getElementById('no-available-msg');
 const noTasksMsg = document.getElementById('no-tasks-msg');
 const noHistoryMsg = document.getElementById('no-history-msg');
-const logoutBtn = document.getElementById('logout-btn');
-const refreshBtn = document.getElementById('refresh-btn');
-const mapModal = document.getElementById('map-modal');
-const closeMapBtn = document.querySelector('.close-map');
+// ... (rest of controls)
 
-// State
-let currentUser = null;
-let currentTrackingId = null;
-let watchId = null;
-let map = null;
-let mapMarker = null;
-let destinationMarker = null;
-
-// Auth Check
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        currentUser = user;
-        // Check if user has delivery role
-        try {
-            loadingOverlay.innerText = "Verifying Profile...";
-            const userRef = ref(db, `users/${user.uid}`);
-            const snapshot = await get(userRef);
-
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-
-                if (userData.role === 'delivery' || userData.role === 'admin') {
-                    loadingOverlay.style.display = 'none';
-                    dashboardContent.style.display = 'block';
-                    loadAssignedDeliveries();
-                } else if (userData.role === 'pending_delivery') {
-                    loadingOverlay.innerHTML = "<div style='text-align:center;'><h3>Approval Pending</h3><p>Your Delivery Partner account is awaiting Admin approval.</p><button onclick='location.reload()' style='margin-top:10px; padding:5px 10px;'>Check Again</button> <button onclick='document.getElementById(\"logout-btn\").click()' style='margin-top:10px; padding:5px 10px;'>Logout</button></div>";
-                } else {
-                    alert("Access Denied: You are not a registered Delivery Partner.");
-                    window.location.href = "index.html";
-                }
-            } else {
-                alert("Access Denied: User profile not found.");
-                window.location.href = "index.html";
-            }
-        } catch (e) {
-            console.error("Profile Load Error", e);
-            loadingOverlay.innerHTML = `<p style='color:red;'>Error loading profile: ${e.message}</p>`;
-        }
-    } else {
-        window.location.href = "login.html";
-    }
-});
+// ...
 
 // Load Deliveries
 async function loadAssignedDeliveries() {
     if (!pendingContainer) return;
 
+    // Reset UI
+    if (availableContainer) availableContainer.innerHTML = '';
     pendingContainer.innerHTML = '<p style="text-align:center;">Loading...</p>';
     completedContainer.innerHTML = '';
+
+    if (noAvailableMsg) noAvailableMsg.style.display = 'none';
     noTasksMsg.style.display = 'none';
     noHistoryMsg.style.display = 'none';
+
+    // ... Inside loadAssignedDeliveries ...
 
     try {
         const donationsRef = ref(db, 'donations');
@@ -99,32 +62,77 @@ async function loadAssignedDeliveries() {
 
         if (snapshot.exists()) {
             const data = snapshot.val();
-            const donations = Object.entries(data).map(([key, val]) => ({ id: key, ...val }));
+            const allDonations = Object.entries(data).map(([key, val]) => ({ id: key, ...val }));
 
-            const myAssigned = donations.filter(d => d.assignedTo === currentUser.uid);
-
-            const pendingTasks = myAssigned.filter(d =>
-                !d.status || ['assigned', 'in progress'].includes(d.status.toLowerCase())
+            // 1. Available for Pickup (Pending & Unassigned)
+            // Logic: Status is Pending OR (Status is Assigned/In Progress but BUT assignedTo is empty - edge case)
+            const availableTasks = allDonations.filter(d =>
+                (!d.assignedTo) && (!d.status || d.status.toLowerCase() === 'pending')
             );
 
-            const completedTasks = myAssigned.filter(d =>
-                d.status && ['received', 'completed', 'confirmed'].includes(d.status.toLowerCase())
+            // 2. My Active Deliveries
+            const myActiveTasks = allDonations.filter(d =>
+                d.assignedTo === currentUser.uid &&
+                (['assigned', 'in progress'].includes(d.status ? d.status.toLowerCase() : ''))
             );
 
-            // Render Pending
-            if (pendingTasks.length > 0) {
-                pendingTasks.forEach(task => {
-                    const card = renderTaskCard(task);
+            // 3. My History
+            const myHistory = allDonations.filter(d =>
+                d.assignedTo === currentUser.uid &&
+                (['received', 'completed', 'rejected'].includes(d.status ? d.status.toLowerCase() : ''))
+            );
+
+            // --- DEBUG PANEL (Temporary) ---
+            const debugPanel = document.getElementById('debug-panel') || document.createElement('div');
+            debugPanel.id = 'debug-panel';
+            debugPanel.style.position = 'fixed';
+            debugPanel.style.bottom = '10px';
+            debugPanel.style.right = '10px';
+            debugPanel.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            debugPanel.style.color = 'lime';
+            debugPanel.style.padding = '10px';
+            debugPanel.style.fontSize = '12px';
+            debugPanel.style.zIndex = '10000';
+            debugPanel.innerHTML = `
+                <b>Debug Stats</b><br>
+                Total Fetch: ${allDonations.length}<br>
+                Available: ${availableTasks.length}<br>
+                Active: ${myActiveTasks.length}<br>
+                History: ${myHistory.length}<br>
+                My UID: ...${currentUser.uid.slice(-5)}
+            `;
+            document.body.appendChild(debugPanel);
+            // --------------------------------
+
+            // Render Available
+            if (availableContainer) {
+                if (availableTasks.length > 0) {
+                    availableContainer.innerHTML = ''; // Clear explicit msg
+                    availableTasks.forEach(task => {
+                        const card = renderTaskCard(task, 'available');
+                        availableContainer.appendChild(card);
+                    });
+                } else {
+                    noAvailableMsg.style.display = 'block';
+                }
+            }
+
+            // ... (rest of render logic)
+
+            // Render Active
+            if (myActiveTasks.length > 0) {
+                myActiveTasks.forEach(task => {
+                    const card = renderTaskCard(task, 'active');
                     pendingContainer.appendChild(card);
                 });
             } else {
                 noTasksMsg.style.display = 'block';
             }
 
-            // Render Completed
-            if (completedTasks.length > 0) {
-                completedTasks.forEach(task => {
-                    const card = renderTaskCard(task, true); // true for history
+            // Render History
+            if (myHistory.length > 0) {
+                myHistory.forEach(task => {
+                    const card = renderTaskCard(task, 'history');
                     completedContainer.appendChild(card);
                 });
             } else {
@@ -132,6 +140,7 @@ async function loadAssignedDeliveries() {
             }
 
         } else {
+            if (noAvailableMsg) noAvailableMsg.style.display = 'block';
             noTasksMsg.style.display = 'block';
             noHistoryMsg.style.display = 'block';
         }
@@ -142,20 +151,24 @@ async function loadAssignedDeliveries() {
 }
 
 // Render Task Card
-function renderTaskCard(task, isHistory = false) {
+function renderTaskCard(task, type = 'active') {
+    // type: 'available' | 'active' | 'history'
     const card = document.createElement('div');
     card.className = 'task-card';
     if (task.status === 'In Progress') card.classList.add('tracking-active');
 
-    const isStarted = task.status === 'In Progress';
-
     let actionBtn = '';
-    if (!isHistory) {
+
+    if (type === 'available') {
+        actionBtn = `<button class="btn-action btn-approve" onclick="window.acceptTask('${task.id}')">Accept Task</button>`;
+    } else if (type === 'active') {
+        const isStarted = task.status === 'In Progress';
         actionBtn = !isStarted ?
             `<button class="btn-action btn-start" onclick="window.startDelivery('${task.id}')">Start Pickup</button>` :
             `<button class="btn-action btn-complete" onclick="window.completeDelivery('${task.id}')">Complete Pickup</button>`;
     } else {
-        actionBtn = `<span style="color: green; font-weight: bold;">✓ Completed</span>`;
+        // History
+        actionBtn = `<span style="color: green; font-weight: bold;">✓ ${task.status}</span>`;
     }
 
     // Map Button Logic (Safe check)
@@ -167,7 +180,7 @@ function renderTaskCard(task, isHistory = false) {
     card.innerHTML = `
         <div class="task-header">
             <h3>${task.category}</h3>
-            <span class="status-badge ${task.status === 'In Progress' ? 'status-completed' : 'status-pending'}">${task.status || 'Assigned'}</span>
+            <span class="status-badge ${task.status === 'In Progress' ? 'status-completed' : 'status-pending'}">${task.status || 'Pending'}</span>
         </div>
         <div class="task-details">
             <div class="detail-item">
@@ -206,6 +219,24 @@ function renderTaskCard(task, isHistory = false) {
 
     return card;
 }
+
+// Global functions for buttons
+window.acceptTask = async (donationId) => {
+    if (!currentUser) return;
+    if (!confirm("Accept this delivery task?")) return;
+
+    try {
+        await update(ref(db, `donations/${donationId}`), {
+            assignedTo: currentUser.uid,
+            status: 'Assigned',
+            assignedTime: Date.now()
+        });
+        alert("Task accepted! It is now in your Active Deliveries.");
+        loadAssignedDeliveries();
+    } catch (e) {
+        alert("Error accepting task: " + e.message);
+    }
+};
 
 // Global functions for buttons
 window.startDelivery = async (donationId) => {

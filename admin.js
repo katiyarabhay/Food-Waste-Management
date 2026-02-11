@@ -174,6 +174,12 @@ function renderDonationRow(donation) {
         assignedName = partner ? partner.name : "Unknown ID";
     }
 
+
+    const isCompleted = ['received', 'completed'].includes(lowerStatus);
+    const assignBtn = isCompleted
+        ? `<button class="action-btn" style="background-color: #ccc; cursor: not-allowed;" disabled>Done</button>`
+        : `<button class="action-btn" style="background-color: #f39c12;" onclick="openAssignmentModal('${donation.id}')">Assign</button>`;
+
     const row = document.createElement('tr');
     row.innerHTML = `
         <td>${date}</td>
@@ -185,11 +191,12 @@ function renderDonationRow(donation) {
         <td><span class="${statusClass}">${statusText}</span></td>
         <td>${assignedName}</td>
         <td>
-            <button class="action-btn" style="background-color: #f39c12;" onclick="openAssignmentModal('${donation.id}')">Assign</button>
+            ${assignBtn}
             <button class="action-btn btn-approve" onclick="updateStatus('${donation.id}', 'Received')">Accept</button>
             <button class="action-btn btn-reject" onclick="updateStatus('${donation.id}', 'Rejected')">Reject</button>
         </td>
     `;
+
     donationsList.appendChild(row);
 }
 
