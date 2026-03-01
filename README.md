@@ -80,6 +80,7 @@ Contributions are welcome! If you have suggestions for improvements or new featu
 ## 📧 Contact
 
 **Abhay Katiyar** - [abhayakatiyar@gmail.com](mailto:abhayakatiyar@gmail.com)  
+**Aditi Suniti** - [aditi.suniti04@gmail.com](mailto:aditi.suniti04@gmail.com)  
 Project Link: [https://github.com/katiyarabhay/Food-Waste-Management](https://github.com/katiyarabhay/Food-Waste-Management)
 
 ---
