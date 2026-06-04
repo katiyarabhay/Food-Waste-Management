@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, height=device-width initial-scale=1.0">
+  <title>Let's Donate </title>
+  <link rel="icon" href="Untitled design (1).png" type="image/x-icon">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Leaflet Geocoder CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <style>
+    /* Location Picker Modal */
+    #location-modal {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    #location-map-container {
+      position: relative;
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 0;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 600px;
+      height: 60vh;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #location-map {
+      flex: 1;
+      width: 100%;
+      border-radius: 8px 8px 0 0;
+    }
+
+    #location-controls {
+      padding: 15px;
+      text-align: center;
+      background: white;
+      border-radius: 0 0 8px 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <div class="head">
+        <h1><b>HAPPIPLATES</b></h1>
+        <!-- <p class="author">Abhay & Aditi</p> -->
+      </div>
+    </div>
+  </header>
+  <nav class="navbar">
+    <div class="logo">Menu</div>
+    <ul class="nav-links">
+      <li>
+        <a href="#" class="home">
+          HOME
+        </a>
+
+      </li>
+      <li><a href="login.html" class="home">LOGIN</a></li>
+      <li><a href="my-account.html" class="home">MY ACCOUNT</a></li>
+      <li><a href="#about" class="home">ABOUT US</a></li>
+    </ul>
+    </div>
+    <div class="menu-toggle" id="mobile-menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+  </nav>
+  <!-- <button class="home">
+    Home
+</button> -->
+  <main class="main">
+    <div class="container">
+
+
+      <section class="donate">
+        <h2 class="section-title">Donate</h2>
+        <div class="donation-options">
+          <div class="donation-card donation-rice">
+            <h3>FEED RICE</h3>
+            <p>HELP US PROVIDE RICE TO THOSE IN NEED.</p>
+            <a href="#" class="button-33 donate-btn" data-category="Rice">
+              Donate Now
+            </a>
+          </div>
+          <div class="donation-card donation-pulses">
+            <h3>FEED PULSES</h3>
+            <p>FEED PROTEINS THROUGH PULSES.</p>
+            <a href="#" class="button-33 donate-btn" data-category="Pulses">
+              Donate Now
+            </a>
+          </div>
+          <div class="donation-card donation-fats">
+            <h3>DONATE HEALTHY FATS</h3>
+            <p>DONATE HEALTHY FATS THROUGH OIL OR BUTTER</p>
+            <a href="#" class="button-33 donate-btn" data-category="Fats">
+              Donate Now
+            </a>
+          </div>
+          <div class="donation-card donation-bread">
+            <h3>FEED BREAD</h3>
+            <p>FEED CARBOHYDRATES THROUGH ROTI, BREADS </p>
+            <a href="#" class="button-33 donate-btn" data-category="Breads">
+              Donate Now
+            </a>
+          </div>
+          <div class="donation-card donation-funds">
+            <h3>DONATE FUNDS </h3>
+            <p>DONATE MONEY TO MAKE US FEED A NUTRITIOUS MEAL</p>
+            <a href="#" class="button-33 donate-btn" data-category="Funds">
+              Donate Now
+            </a>
+          </div>
+          <div class="donation-card donation-vegetables">
+            <h3>DONATE VEGETABLES</h3>
+            <p>FEED VITAMIN AND MINERALS </p>
+            <a href="#" class="button-33 donate-btn" data-category="Vegetables">
+              Donate Now
+            </a>
+          </div>
+          <div class="donation-card donation-spices">
+            <h3>DONATE SPICES</h3>
+            <p>FEED TASTY MEAL PACKED WITH NUTRITION </p>
+            <a href="#" class="button-33 donate-btn" data-category="Spices">
+              Donate Now
+            </a>
+          </div>
+          <div class="donation-card donation-fruits">
+            <h3>DONATE FRUITS</h3>
+            <p>FEED TASTY MEAL PACKED WITH NUTRITION </p>
+            <a href="#" class="button-33 donate-btn" data-category="Fruits">
+              Donate Now
+            </a>
+          </div>
+        </div>
+      </section>
+      <section class="about">
+        <span id="about">
+          <h2 class="section-title-teal">About Us</h2>
+        </span>
+        <div id="abtus">
+          <p>
+            Welcome to HappiPlates , a community-driven platform dedicated to combating hunger and promoting
+            food security for those in need. Our mission is simple: to connect generous individuals, businesses, and
+            organizations with people who require access to nutritious meals. Every day, millions of people go without
+            enough food, and we believe that together, we can make a difference.
+
+            We provide an easy and transparent way for donors to contribute food to those who need it most. Through
+            partnerships with local food banks, shelters, and community outreach programs, we ensure that every donation
+            reaches the right hands. Whether it's surplus food from businesses, home-cooked meals, or monetary
+            contributions to purchase fresh produce, we are here to facilitate and organize the process.
+
+            At HappiPlates , we believe in the power of community and the impact of small acts of kindness.
+            Together, we can help create a world where no one has to go hungry. Join us in our efforts to feed families,
+            support communities, and build a better, more compassionate future for all.
+          </p>
+        </div>
+      </section>
+      </section>
+
+      <!-- <section class="contact">
+        <h2>Contact Us</h2>
+        <p>If you have any questions or want to get involved, feel free to reach out.</p>
+        <a href="https://linktr.ee/abhay2610" class="contact-button">Contact Us</a>
+      </section> -->
+      <div class="contact-us">
+        <h1>Contact Us</h1>
+        <h2>Follow us on social media or reach out via email:</h2>
+        <div class="social-icons">
+          <a href="https://www.instagram.com/apna.community_kitchen?igsh=MWNseDg1anF5YXdsNg==" target="_blank"
+            class="icon instagram">
+            <img src="https://img.icons8.com/color/48/000000/instagram-new.png" alt="Instagram">
+          </a>
+          <a href="https://x.com/_iam_thedevil" target="_blank" class="icon x">
+            <img src="https://img.icons8.com/color/48/000000/twitter.png" alt="X (Twitter)">
+          </a>
+          <a href="https://www.youtube.com" target="_blank" class="icon youtube">
+            <img src="https://img.icons8.com/color/48/000000/youtube-play.png" alt="YouTube">
+          </a>
+          <a href="https://wa.me/6307665328" target="_blank" class="icon whatsapp">
+            <img src="https://img.icons8.com/color/48/000000/whatsapp.png" alt="WhatsApp">
+          </a>
+          <a href="mailto:abhayakatiyar@gmail.com" class="icon email">
+            <img src="https://img.icons8.com/color/48/000000/email.png" alt="Email">
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div class="container">
+      <ul>
+        <li><a href="#">Weekly Goals</a></li>
+        <li><a href="https://forms.gle/n1SHshKTgDEpqzYL7">Help Centre</a></li>
+        <li><a href="#" id="logout-btn">Logout</a></li>
+      </ul>
+      <p>&copy; 2025 HappiPlates. All rights reserved.</p>
+    </div>
+    <script src="https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js"></script>
+    <!-- 
+    <script>
+      window.addEventListener("DOMContentLoaded", func tion         
+        window.AgentInitialize({
+        rootId: "JotformAgent-0195004371537b3388de7d2654          9b8a",
+        formID: "0195004371537b3388de7d          a00c9b8a",
+        queryParams: ["skipWelcome=1          ximizable=1"],
+        domain: "htt          /www.jotform.com",
+        isInitialOpen: fals                 isDraggable: false,
+        background: "linear-gradient          g, #C8CEED 0%, #C8CEED 100%)",
+        buttonBackgroundColor: "          1",
+        bu          onColor: "#fff",
+        variant: false,
+        customizations: {
+          greeting: "Yes                   greetin            : "Hi! How can I a          yo        
+                pulse: "Yes",
+          position: "right"
+        }
+      });
+    </script> 
+    -->
+    <a href="feed.html" class="button-link">
+      Feedback
+    </a>
+  </footer>
+
+  <!-- Donation Modal -->
+  <div id="donation-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Make a Donation</h2>
+      <form id="donation-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" required placeholder="Enter your name">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+        </div>
+
+        <div class="form-group">
+          <label for="category">Donation Type</label>
+          <select id="category" name="category">
+            <option value="Rice">Rice</option>
+            <option value="Pulses">Pulses</option>
+            <option value="Fats">Healthy Fats (Oil/Butter)</option>
+            <option value="Breads">Breads/Roti</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Spices">Spices</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Funds">Funds</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="quantity">Quantity / Amount</label>
+          <input type="text" id="quantity" name="quantity" required placeholder="e.g., 5kg or ₹500">
+        </div>
+
+        <div class="form-group">
+          <label for="address">Pickup Address (if applicable)</label>
+          <textarea id="address" name="address" rows="2" placeholder="Enter pickup address"></textarea>
+          <button type="button" id="get-location-btn" class="button-33"
+            style="width: auto; margin-top: 10px; font-size: 0.9em; padding: 5px 15px;">
+            📍 Share My Current Location
+          </button>
+          <span id="location-status" style="font-size: 0.8em; margin-left: 10px; color: #666;"></span>
+          <input type="hidden" id="latitude" name="latitude">
+          <input type="hidden" id="longitude" name="longitude">
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message (Optional)</label>
+          <textarea id="message" name="message" rows="2" placeholder="Any special instructions?"></textarea>
+        </div>
+
+        <button type="submit" class="button-33 submit-btn">Submit Donation</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Location Picker Modal -->
+  <div id="location-modal">
+    <div id="location-map-container">
+      <div id="location-map"></div>
+      <div id="location-controls">
+        <p style="margin-bottom: 10px; font-weight: 500;">Draft the pin to your exact location</p>
+        <button type="button" id="confirm-location-btn" class="button-33" style="width: auto;">Confirm Location</button>
+        <button type="button" id="cancel-location-btn" class="button-33"
+          style="width: auto; background-color: #e74c3c;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Leaflet Geocoder JS -->
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <!-- Firebase initialization moved to script.js -->
+  <script src="firebase-config.js" type="module"></script>
+  <script src="script.js?v=1.1" type="module"></script>
+</body>
+
+</html>

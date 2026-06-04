@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - HappiPlates</title>
-    <link rel="icon" href="Untitled design (1).png" type="image/x-icon">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/images/Untitled design (1).png" type="image/x-icon">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/style.css">
     <style>
         /* Reset body styles inherited from style.css */
         body {
@@ -228,6 +228,8 @@
                 style="padding: 8px 16px; font-size: 14px; background-color: #333; color: white;">Donations</button>
             <button id="view-partners-btn" class="button-33"
                 style="padding: 8px 16px; font-size: 14px;">Partners</button>
+            <button id="view-feedback-btn" class="button-33"
+                style="padding: 8px 16px; font-size: 14px;">Feedback</button>
             <button id="refresh-btn" class="button-33" style="padding: 8px 16px; font-size: 14px;">Refresh Data</button>
         </div>
 
@@ -315,6 +317,26 @@
             <p id="no-partners-msg" style="display: none; text-align: center; margin-top: 20px; color: #777;">No
                 delivery partners found.</p>
         </div>
+
+        <div id="feedback-section" style="display: none;">
+            <h3>User Feedback</h3>
+
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Feedback Message</th>
+                    </tr>
+                </thead>
+                <tbody id="feedback-list">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+            <p id="no-feedback-msg" style="display: none; text-align: center; margin-top: 20px; color: #777;">No
+                feedback found.</p>
+        </div>
     </div>
 
     <!-- Admin Settings Modal -->
@@ -362,7 +384,7 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="admin.js" type="module"></script>
+    <script src="assets/js/admin.js" type="module"></script>
 </body>
 
 </html>

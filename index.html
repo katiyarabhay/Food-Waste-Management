@@ -3,10 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, height=device-width initial-scale=1.0">
-  <title>Let's Donate </title>
-  <link rel="icon" href="Untitled design (1).png" type="image/x-icon">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HappiPlates - Food Waste Management System</title>
+  <link rel="icon" href="assets/images/Untitled design (1).png" type="image/x-icon">
+  <link rel="stylesheet" href="assets/css/styles.css">
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -56,43 +56,116 @@
 </head>
 
 <body>
-  <header>
-    <div class="container">
-      <div class="head">
-        <h1><b>HAPPIPLATES</b></h1>
-        <!-- <p class="author">Abhay & Aditi</p> -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <a href="index.html">🍽️ HappiPlates</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#" class="active">HOME</a></li>
+        <li><a href="#donate">DONATE</a></li>
+        <li><a href="#how-it-works">HOW IT WORKS</a></li>
+        <li><a href="#impact">IMPACT</a></li>
+        <li><a href="#about">ABOUT</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="login.html" class="login-btn-nav">LOGIN</a></li>
+        <li><a href="my-account.html" style="display:none;" id="account-nav-link">MY ACCOUNT</a></li>
+      </ul>
+      <div class="menu-toggle" id="mobile-menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
       </div>
     </div>
-  </header>
-  <nav class="navbar">
-    <div class="logo">Menu</div>
-    <ul class="nav-links">
-      <li>
-        <a href="#" class="home">
-          HOME
-        </a>
-
-      </li>
-      <li><a href="login.html" class="home">LOGIN</a></li>
-      <li><a href="my-account.html" class="home">MY ACCOUNT</a></li>
-      <li><a href="#about" class="home">ABOUT US</a></li>
-    </ul>
-    </div>
-    <div class="menu-toggle" id="mobile-menu">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </div>
   </nav>
-  <!-- <button class="home">
-    Home
-</button> -->
+
+  <!-- Hero Section -->
+  <section class="hero-section container" id="hero">
+    <div class="hero-content">
+      <h1>Bridging Surplus Food and Community Need</h1>
+      <p>HappiPlates connects local donors with dedicated delivery partners to rescue surplus food and ensure it reaches shelters and families in need. Every donation makes an impact.</p>
+      <div class="hero-buttons">
+        <a href="#donate" class="btn-primary-hero">Donate Food Now</a>
+        <a href="login.html" class="btn-secondary-hero">Become a Partner</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">5,230+</span>
+          <span class="stat-label">Meals Shared</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">1,200+</span>
+          <span class="stat-label">Active Donors</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">45+</span>
+          <span class="stat-label">Delivery Partners</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-image-card">
+      <div class="card-feature">
+        <h3>🌱 Why Rescuing Food Matters</h3>
+        <ul class="card-feature-list">
+          <li class="card-feature-item">
+            <div class="feature-icon">1</div>
+            <div class="feature-text">
+              <h4>Combat Hunger</h4>
+              <p>Directly feed homeless shelters, community kitchens, and individuals facing food insecurity.</p>
+            </div>
+          </li>
+          <li class="card-feature-item">
+            <div class="feature-icon">2</div>
+            <div class="feature-text">
+              <h4>Reduce CO2 Emissions</h4>
+              <p>Methane from landfill food waste is a major driver of climate change. Rescuing food stops this.</p>
+            </div>
+          </li>
+          <li class="card-feature-item">
+            <div class="feature-icon">3</div>
+            <div class="feature-text">
+              <h4>Zero Logistics Stress</h4>
+              <p>Our volunteer delivery network coordinates the pickup and distribution directly.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works container" id="how-it-works">
+    <span class="section-subtitle">Process</span>
+    <h2 class="section-main-title">How HappiPlates Works</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <span class="step-number">01</span>
+        <div class="step-icon-wrapper">🍎</div>
+        <h3>Post Donation</h3>
+        <p>List the food category (grains, vegetables, fruits, etc.), specify quantities, and confirm your location.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">02</span>
+        <div class="step-icon-wrapper">🚚</div>
+        <h3>Match & Pick Up</h3>
+        <p>A nearby registered delivery partner receives the notification and drives over to claim and collect the food.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">03</span>
+        <div class="step-icon-wrapper">🤝</div>
+        <h3>Direct Distribution</h3>
+        <p>The delivery partner delivers the meal safely to the nearest community partner, shelter, or local welfare center.</p>
+      </div>
+    </div>
+  </section>
+
   <main class="main">
     <div class="container">
 
 
-      <section class="donate">
-        <h2 class="section-title">Donate</h2>
+      <section class="donate" id="donate">
+        <span class="section-subtitle">Categories</span>
+        <h2 class="section-main-title">What You Can Donate</h2>
         <div class="donation-options">
           <div class="donation-card donation-rice">
             <h3>FEED RICE</h3>
@@ -152,35 +225,148 @@
           </div>
         </div>
       </section>
-      <section class="about">
-        <span id="about">
-          <h2 class="section-title-teal">About Us</h2>
-        </span>
-        <div id="abtus">
-          <p>
-            Welcome to HappiPlates , a community-driven platform dedicated to combating hunger and promoting
-            food security for those in need. Our mission is simple: to connect generous individuals, businesses, and
-            organizations with people who require access to nutritious meals. Every day, millions of people go without
-            enough food, and we believe that together, we can make a difference.
 
+      <!-- Food Waste Impact Calculator -->
+      <section id="impact" class="impact-calculator-section">
+        <span class="section-subtitle">Real-time Impact</span>
+        <h2 class="section-main-title">Calculate Your Ecological Impact</h2>
+        <div class="calculator-wrapper">
+          <div class="calculator-grid">
+            <div class="calculator-inputs">
+              <div class="calc-group">
+                <label for="calc-category">Food Category</label>
+                <select id="calc-category">
+                  <option value="Rice" data-meals="6.6" data-water="1600" data-co2="2.5">Rice / Grains (per kg)</option>
+                  <option value="Vegetables" data-meals="5.0" data-water="300" data-co2="1.2">Vegetables (per kg)</option>
+                  <option value="Fruits" data-meals="4.5" data-water="900" data-co2="0.8">Fruits (per kg)</option>
+                  <option value="Breads" data-meals="8.0" data-water="1200" data-co2="1.8">Breads/Roti (per kg)</option>
+                  <option value="Pulses" data-meals="7.0" data-water="2500" data-co2="1.5">Pulses/Lentils (per kg)</option>
+                  <option value="Fats" data-meals="10.0" data-water="5000" data-co2="3.0">Healthy Fats/Oil (per kg)</option>
+                </select>
+              </div>
+              <div class="calc-group">
+                <label for="calc-qty">Quantity (in kg)</label>
+                <input type="number" id="calc-qty" value="5" min="1" max="1000">
+              </div>
+            </div>
+            <div class="calculator-results">
+              <div class="result-item">
+                <span class="result-label">Meals Provided:</span>
+                <span class="result-value" id="res-meals">33 meals</span>
+              </div>
+              <div class="result-item">
+                <span class="result-label">Water Saved:</span>
+                <span class="result-value" id="res-water">8,000 liters</span>
+              </div>
+              <div class="result-item">
+                <span class="result-label">CO2 Prevented:</span>
+                <span class="result-value" id="res-co2">12.5 kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials Section -->
+      <section class="testimonials-section">
+        <span class="section-subtitle">Stories</span>
+        <h2 class="section-main-title">What Our Community Says</h2>
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <p class="testimonial-quote">"As a local restaurant owner, food waste was always a painful sight. HappiPlates made it simple to list surplus food at closing, and volunteer partners collect it within the hour."</p>
+            <div class="testimonial-author">
+              <div class="author-avatar">MJ</div>
+              <div class="author-details">
+                <h4>Meera J.</h4>
+                <p>Owner, Green Bistro</p>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p class="testimonial-quote">"Delivering for HappiPlates is the highlight of my week. The real-time tracking gives donors and shelters exact ETAs, making the distribution smooth and reliable."</p>
+            <div class="testimonial-author">
+              <div class="author-avatar color2">KS</div>
+              <div class="author-details">
+                <h4>Karan S.</h4>
+                <p>Delivery Volunteer</p>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p class="testimonial-quote">"Before HappiPlates, coordinating donation logistics was chaotic. Now, we receive fresh, nutritious meals and can track them live, ensuring complete transparency for our donors."</p>
+            <div class="testimonial-author">
+              <div class="author-avatar color3">RC</div>
+              <div class="author-details">
+                <h4>Dr. Rohit C.</h4>
+                <p>Coordinator, Hope Shelter</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About Us Section -->
+      <section class="about" id="about">
+        <span class="section-subtitle">Mission</span>
+        <h2 class="section-main-title">About HappiPlates</h2>
+        <div id="abtus" style="text-align: left; max-width: 800px; margin: 0 auto;">
+          <p>
+            Welcome to HappiPlates, a community-driven platform dedicated to combating hunger and promoting
+            food security for those in need. Our mission is simple: to connect generous individuals, businesses, and
+            organizations with people who require access to nutritious meals. Every day, millions of tons of food go to waste
+            while many face hunger, and we believe that together, we can make a difference.
+          </p>
+          <br>
+          <p>
             We provide an easy and transparent way for donors to contribute food to those who need it most. Through
             partnerships with local food banks, shelters, and community outreach programs, we ensure that every donation
             reaches the right hands. Whether it's surplus food from businesses, home-cooked meals, or monetary
             contributions to purchase fresh produce, we are here to facilitate and organize the process.
-
-            At HappiPlates , we believe in the power of community and the impact of small acts of kindness.
+          </p>
+          <br>
+          <p>
+            At HappiPlates, we believe in the power of community and the impact of small acts of kindness.
             Together, we can help create a world where no one has to go hungry. Join us in our efforts to feed families,
             support communities, and build a better, more compassionate future for all.
           </p>
         </div>
       </section>
+
+      <!-- FAQ Accordion Section -->
+      <section id="faq" class="faq-section">
+        <span class="section-subtitle">FAQ</span>
+        <h2 class="section-main-title">Frequently Asked Questions</h2>
+        <div class="faq-container">
+          <div class="faq-item">
+            <div class="faq-header">
+              <h3>Who can donate food through HappiPlates?</h3>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-content">
+              <p>Anyone can donate! We accept food donations from individual households, local grocery stores, wedding organizers, corporate events, and restaurants. Every contribution counts.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-header">
+              <h3>How does the real-time tracking work?</h3>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-content">
+              <p>Once you submit a donation, a delivery partner accepts the task. Using their delivery dashboard, they share their location during pickup and transit, allowing you to trace the journey of your donation on a Leaflet map in real time.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-header">
+              <h3>Is there a registration fee for volunteers?</h3>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-content">
+              <p>No, there is absolutely no registration fee. Signing up as a donor or a delivery partner is entirely free. Our goal is to reduce hunger and waste collaboratively.</p>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <!-- <section class="contact">
-        <h2>Contact Us</h2>
-        <p>If you have any questions or want to get involved, feel free to reach out.</p>
-        <a href="https://linktr.ee/abhay2610" class="contact-button">Contact Us</a>
-      </section> -->
       <div class="contact-us">
         <h1>Contact Us</h1>
         <h2>Follow us on social media or reach out via email:</h2>
@@ -210,32 +396,10 @@
       <ul>
         <li><a href="#">Weekly Goals</a></li>
         <li><a href="https://forms.gle/n1SHshKTgDEpqzYL7">Help Centre</a></li>
-        <li><a href="#" id="logout-btn">Logout</a></li>
+        <li><a href="#" id="logout-btn" style="display:none;">Logout</a></li>
       </ul>
       <p>&copy; 2025 HappiPlates. All rights reserved.</p>
     </div>
-    <script src="https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js"></script>
-    <!-- 
-    <script>
-      window.addEventListener("DOMContentLoaded", func tion         
-        window.AgentInitialize({
-        rootId: "JotformAgent-0195004371537b3388de7d2654          9b8a",
-        formID: "0195004371537b3388de7d          a00c9b8a",
-        queryParams: ["skipWelcome=1          ximizable=1"],
-        domain: "htt          /www.jotform.com",
-        isInitialOpen: fals                 isDraggable: false,
-        background: "linear-gradient          g, #C8CEED 0%, #C8CEED 100%)",
-        buttonBackgroundColor: "          1",
-        bu          onColor: "#fff",
-        variant: false,
-        customizations: {
-          greeting: "Yes                   greetin            : "Hi! How can I a          yo        
-                pulse: "Yes",
-          position: "right"
-        }
-      });
-    </script> 
-    -->
     <a href="feed.html" class="button-link">
       Feedback
     </a>
@@ -317,15 +481,14 @@
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- Leaflet Geocoder JS -->
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-  <!-- Firebase initialization moved to script.js -->
-  <script src="firebase-config.js" type="module"></script>
-  <script src="script.js?v=1.1" type="module"></script>
+  
+  <script src="assets/js/firebase-config.js" type="module"></script>
+  <script src="assets/js/script.js?v=1.1" type="module"></script>
 </body>
 
 </html>

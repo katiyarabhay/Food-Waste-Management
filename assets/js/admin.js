@@ -19,8 +19,12 @@ const logoutBtn = document.getElementById('logout-btn');
 // View Switching
 const viewDonationsBtn = document.getElementById('view-donations-btn');
 const viewPartnersBtn = document.getElementById('view-partners-btn');
+const viewFeedbackBtn = document.getElementById('view-feedback-btn');
 const donationsSection = document.getElementById('donations-section');
 const partnersSection = document.getElementById('partners-section');
+const feedbackSection = document.getElementById('feedback-section');
+const feedbackList = document.getElementById('feedback-list');
+const noFeedbackMsg = document.getElementById('no-feedback-msg');
 
 // Partner Management
 const partnersList = document.getElementById('partners-list');
@@ -79,21 +83,40 @@ async function checkDbAdmin(user) {
 viewDonationsBtn.addEventListener('click', () => {
     donationsSection.style.display = 'block';
     partnersSection.style.display = 'none';
+    feedbackSection.style.display = 'none';
     viewDonationsBtn.style.backgroundColor = '#333';
     viewDonationsBtn.style.color = 'white';
     viewPartnersBtn.style.backgroundColor = '';
     viewPartnersBtn.style.color = '';
+    viewFeedbackBtn.style.backgroundColor = '';
+    viewFeedbackBtn.style.color = '';
     loadDonations();
 });
 
 viewPartnersBtn.addEventListener('click', () => {
     donationsSection.style.display = 'none';
     partnersSection.style.display = 'block';
+    feedbackSection.style.display = 'none';
     viewPartnersBtn.style.backgroundColor = '#333';
     viewPartnersBtn.style.color = 'white';
     viewDonationsBtn.style.backgroundColor = '';
     viewDonationsBtn.style.color = '';
+    viewFeedbackBtn.style.backgroundColor = '';
+    viewFeedbackBtn.style.color = '';
     loadPartners();
+});
+
+viewFeedbackBtn.addEventListener('click', () => {
+    donationsSection.style.display = 'none';
+    partnersSection.style.display = 'none';
+    feedbackSection.style.display = 'block';
+    viewFeedbackBtn.style.backgroundColor = '#333';
+    viewFeedbackBtn.style.color = 'white';
+    viewDonationsBtn.style.backgroundColor = '';
+    viewDonationsBtn.style.color = '';
+    viewPartnersBtn.style.backgroundColor = '';
+    viewPartnersBtn.style.color = '';
+    loadFeedback();
 });
 
 
@@ -433,10 +456,55 @@ if (closeMap) {
     });
 }
 
+// --- Feedback Management Logic ---
+async function loadFeedback() {
+    feedbackList.innerHTML = '';
+    noFeedbackMsg.style.display = 'none';
+
+    try {
+        const feedbackRef = ref(db, 'feedback');
+        const snapshot = await get(feedbackRef);
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const feedbacks = Object.entries(data).map(([key, value]) => ({
+                id: key,
+                ...value
+            }));
+
+            // Sort by latest first
+            feedbacks.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            feedbacks.forEach(fb => {
+                const date = new Date(fb.timestamp).toLocaleDateString() + ' ' + new Date(fb.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const row = document.createElement('tr');
+
+                // Basic sanitization
+                const escapeHTML = (str) => String(str).replace(/[&<>'"]/g, tag => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+                }[tag]));
+
+                row.innerHTML = `
+                    <td>${date}</td>
+                    <td>${escapeHTML(fb.firstName || '')} ${escapeHTML(fb.lastName || '')}</td>
+                    <td>${escapeHTML(fb.phone || '')}<br>${escapeHTML(fb.email || '')}</td>
+                    <td>${escapeHTML(fb.feedback || '')}</td>
+                `;
+                feedbackList.appendChild(row);
+            });
+        } else {
+            noFeedbackMsg.style.display = 'block';
+        }
+    } catch (error) {
+        console.error("Error loading feedback:", error);
+    }
+}
+
 // Global Refresh
 refreshBtn.addEventListener('click', () => {
     if (donationsSection.style.display !== 'none') loadDonations();
-    else loadPartners();
+    else if (partnersSection.style.display !== 'none') loadPartners();
+    else loadFeedback();
 });
 
 // Logout
