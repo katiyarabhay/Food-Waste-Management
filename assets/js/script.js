@@ -2,6 +2,7 @@ import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { FoodFreshnessPredictor, generateFreshnessUI } from './freshness-predictor.js';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -394,4 +395,231 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // ==========================================================
+    // AI FOOD FRESHNESS PREDICTOR INTEGRATION
+    // ==========================================================
+    const freshnessPredictor = new FoodFreshnessPredictor();
+    let currentHomeImage = null;
+    let currentModalImage = null;
+
+    // --- 1. Standalone Home Page AI Scanner ---
+    const homeDropzone = document.getElementById('home-dropzone');
+    const homeDropzoneTrigger = document.getElementById('home-dropzone-trigger');
+    const homeFileInput = document.getElementById('home-food-image');
+    const homeTimeSlider = document.getElementById('home-time-elapsed');
+    const homeTimeDisplay = document.getElementById('home-time-display');
+    const homeAnalyzeBtn = document.getElementById('home-analyze-btn');
+    const homeScanWrapper = document.getElementById('home-scan-wrapper');
+    const homePreviewImg = document.getElementById('home-preview-img');
+    const homeLaser = document.getElementById('home-laser');
+    const homeScanStatus = document.getElementById('home-scan-status-label');
+    const homeAnalysisResults = document.getElementById('home-analysis-results');
+
+    if (homeDropzone && homeFileInput) {
+        homeDropzone.addEventListener('click', () => homeFileInput.click());
+
+        homeDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            homeDropzone.classList.add('dragover');
+        });
+
+        homeDropzone.addEventListener('dragleave', () => {
+            homeDropzone.classList.remove('dragover');
+        });
+
+        homeDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            homeDropzone.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleHomeImageUpload(e.dataTransfer.files[0]);
+            }
+        });
+
+        homeFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleHomeImageUpload(e.target.files[0]);
+            }
+        });
+
+        function handleHomeImageUpload(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Please select a valid picture format (JPG, PNG, WEBP).');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentHomeImage = new Image();
+                currentHomeImage.src = e.target.result;
+                currentHomeImage.onload = () => {
+                    homeAnalyzeBtn.disabled = false;
+                    if (homeDropzoneTrigger) {
+                        homeDropzoneTrigger.querySelector('h4').textContent = `Loaded: ${file.name}`;
+                        homeDropzoneTrigger.querySelector('p').textContent = "Ready for CNN Freshness Evaluation";
+                    }
+                    homeAnalysisResults.innerHTML = '';
+                    homeScanWrapper.style.display = 'none';
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        if (homeTimeSlider && homeTimeDisplay) {
+            homeTimeSlider.addEventListener('input', (e) => {
+                const hrs = e.target.value;
+                homeTimeDisplay.textContent = `${hrs} hour${hrs !== '1' ? 's' : ''}`;
+                if (homeAnalysisResults.innerHTML !== '' && currentHomeImage) {
+                    runHomeScan();
+                }
+            });
+        }
+
+        if (homeAnalyzeBtn) {
+            homeAnalyzeBtn.addEventListener('click', () => runHomeScan());
+        }
+
+        async function runHomeScan() {
+            if (!currentHomeImage) return;
+            homeAnalyzeBtn.disabled = true;
+            homeAnalyzeBtn.textContent = '⚡ Running CNN Analysis...';
+            homeScanWrapper.style.display = 'block';
+            homePreviewImg.src = currentHomeImage.src;
+            if (homeLaser) homeLaser.style.display = 'block';
+            if (homeScanStatus) {
+                homeScanStatus.style.display = 'block';
+                homeScanStatus.textContent = "⏳ Initiating multi-parameter image analysis across 8 indicators...";
+            }
+            homeAnalysisResults.innerHTML = '';
+
+            // Simulate deep learning diagnostic processing time (1.5 seconds)
+            setTimeout(async () => {
+                const hours = parseFloat(homeTimeSlider.value) || 0;
+                const result = await freshnessPredictor.analyze(currentHomeImage, hours, "General");
+                
+                if (homeLaser) homeLaser.style.display = 'none';
+                if (homeScanStatus) {
+                    homeScanStatus.textContent = `✅ Scan Complete: ${result.statusText}`;
+                    homeScanStatus.style.color = "#10b981";
+                }
+                
+                homeAnalysisResults.innerHTML = generateFreshnessUI(result, currentHomeImage.src);
+                homeAnalyzeBtn.disabled = false;
+                homeAnalyzeBtn.textContent = '⚡ Re-run CNN Freshness Scan';
+            }, 1500);
+        }
+    }
+
+    // --- 2. Donation Modal AI Scanner Integration ---
+    const modalScannerBox = document.getElementById('modal-scanner-box');
+    const modalUploadTrigger = document.getElementById('modal-upload-trigger');
+    const modalFileInput = document.getElementById('modal-food-image');
+    const modalTimeSlider = document.getElementById('modal-time-elapsed');
+    const modalTimeDisplay = document.getElementById('modal-time-display');
+    const modalScanPreview = document.getElementById('modal-scan-preview');
+    const modalPreviewImg = document.getElementById('modal-preview-img');
+    const modalScanStatus = document.getElementById('modal-scan-status');
+    const modalScanResult = document.getElementById('modal-scan-result');
+
+    // Hidden input fields in donation form
+    const inputFreshnessScore = document.getElementById('freshnessScore');
+    const inputFreshnessStatus = document.getElementById('freshnessStatus');
+    const inputFreshnessParams = document.getElementById('freshnessParameters');
+    const inputScannedPreview = document.getElementById('scannedImagePreview');
+
+    if (categorySelect && modalScannerBox) {
+        const toggleScannerVisibility = () => {
+            if (categorySelect.value === 'Funds') {
+                modalScannerBox.style.display = 'none';
+            } else {
+                modalScannerBox.style.display = 'block';
+            }
+        };
+        categorySelect.addEventListener('change', toggleScannerVisibility);
+        donateButtons.forEach(btn => btn.addEventListener('click', () => setTimeout(toggleScannerVisibility, 50)));
+    }
+
+    if (modalUploadTrigger && modalFileInput) {
+        modalUploadTrigger.addEventListener('click', () => modalFileInput.click());
+
+        modalFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentModalImage = new Image();
+                    currentModalImage.src = event.target.result;
+                    currentModalImage.onload = () => {
+                        modalUploadTrigger.textContent = `📸 Change Picture (${file.name})`;
+                        runModalScan();
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        if (modalTimeSlider && modalTimeDisplay) {
+            modalTimeSlider.addEventListener('input', (e) => {
+                const hrs = e.target.value;
+                modalTimeDisplay.textContent = `${hrs} hour${hrs !== '1' ? 's' : ''}`;
+                if (currentModalImage) {
+                    runModalScan(true);
+                }
+            });
+        }
+
+        function runModalScan(isFastUpdate = false) {
+            if (!currentModalImage) return;
+            modalScanPreview.style.display = 'block';
+            modalPreviewImg.src = currentModalImage.src;
+            modalScanResult.innerHTML = '';
+
+            const delay = isFastUpdate ? 200 : 1300;
+            if (!isFastUpdate && modalScanStatus) {
+                modalScanStatus.textContent = "⏳ Analyzing food picture via CNN algorithms...";
+                modalScanStatus.style.color = "#008080";
+            }
+
+            setTimeout(async () => {
+                const hours = parseFloat(modalTimeSlider ? modalTimeSlider.value : 0) || 0;
+                const cat = categorySelect ? categorySelect.value : "General";
+                const res = await freshnessPredictor.analyze(currentModalImage, hours, cat);
+
+                if (modalScanStatus) {
+                    modalScanStatus.textContent = `Quality Certified: ${res.freshnessPercentage}% Fresh (${res.statusText})`;
+                    modalScanStatus.style.color = res.isDonationRecommended ? "#10b981" : "#ef4444";
+                }
+
+                modalScanResult.innerHTML = generateFreshnessUI(res, currentModalImage.src);
+
+                if (inputFreshnessScore) inputFreshnessScore.value = `${res.freshnessPercentage}%`;
+                if (inputFreshnessStatus) inputFreshnessStatus.value = res.statusText;
+                if (inputFreshnessParams) inputFreshnessParams.value = JSON.stringify(res.parameters);
+                if (inputScannedPreview && currentModalImage.src.length < 50000) {
+                    inputScannedPreview.value = modalFileInput.files[0] ? modalFileInput.files[0].name : "scanned_food.jpg";
+                }
+            }, delay);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', resetModalScannerState);
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) resetModalScannerState();
+        });
+        if (donationForm) {
+            donationForm.addEventListener('reset', resetModalScannerState);
+        }
+
+        function resetModalScannerState() {
+            currentModalImage = null;
+            if (modalUploadTrigger) modalUploadTrigger.textContent = "📸 Upload Food Picture to Test Quality";
+            if (modalScanPreview) modalScanPreview.style.display = 'none';
+            if (modalScanResult) modalScanResult.innerHTML = '';
+            if (modalTimeSlider) modalTimeSlider.value = 0;
+            if (modalTimeDisplay) modalTimeDisplay.textContent = "0 hours";
+            if (inputFreshnessScore) inputFreshnessScore.value = "";
+            if (inputFreshnessStatus) inputFreshnessStatus.value = "";
+            if (inputFreshnessParams) inputFreshnessParams.value = "";
+        }
+    }
 });

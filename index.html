@@ -64,9 +64,8 @@
       </div>
       <ul class="nav-links">
         <li><a href="#" class="active">HOME</a></li>
+        <li><a href="#ai-scanner" class="nav-ai-highlight">🤖 AI SCANNER</a></li>
         <li><a href="#donate">DONATE</a></li>
-        <li><a href="#how-it-works">HOW IT WORKS</a></li>
-        <li><a href="#impact">IMPACT</a></li>
         <li><a href="#about">ABOUT</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li><a href="login.html" class="login-btn-nav">LOGIN</a></li>
@@ -88,20 +87,6 @@
       <div class="hero-buttons">
         <a href="#donate" class="btn-primary-hero">Donate Food Now</a>
         <a href="login.html" class="btn-secondary-hero">Become a Partner</a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat-item">
-          <span class="stat-number">5,230+</span>
-          <span class="stat-label">Meals Shared</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">1,200+</span>
-          <span class="stat-label">Active Donors</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">45+</span>
-          <span class="stat-label">Delivery Partners</span>
-        </div>
       </div>
     </div>
     <div class="hero-image-card">
@@ -162,7 +147,68 @@
 
   <main class="main">
     <div class="container">
+      <!-- AI Food Freshness & Quality Scanner Section -->
+      <section class="ai-scanner-section" id="ai-scanner">
+        <div class="ai-scanner-banner">
+          <div class="scanner-intro">
+            <span class="section-subtitle">State-of-the-Art Quality Assurance</span>
+            <h2 class="section-main-title">AI Food Freshness & Quality Predictor</h2>
+            <p>Our intelligent computer vision engine evaluates your surplus food before donation. Simply upload a picture of your meal and provide the time elapsed since preparation to receive a real-time CNN quality analysis across 8 physical parameters.</p>
+            
+            <div class="scanner-features-pills">
+              <span class="pill-tag">🌾 Texture Integrity</span>
+              <span class="pill-tag">🎨 Color Change</span>
+              <span class="pill-tag">🦠 Mold & Spoilage Detection</span>
+              <span class="pill-tag">💧 Moisture & Water Loss</span>
+              <span class="pill-tag">🥘 Oil Separation</span>
+              <span class="pill-tag">✨ Surface Shine</span>
+              <span class="pill-tag">🤎 Browning Index</span>
+              <span class="pill-tag">⏱️ Time Degradation Kinetics</span>
+            </div>
+          </div>
 
+          <div class="scanner-interactive-box">
+            <div class="scanner-upload-card">
+              <h3>🔬 Test Food Quality Instantly</h3>
+              <div class="dropzone" id="home-dropzone">
+                <input type="file" id="home-food-image" accept="image/*" style="display:none;">
+                <div class="dropzone-content" id="home-dropzone-trigger">
+                  <span class="upload-icon">📸</span>
+                  <h4>Click or Drag & Drop Food Picture Here</h4>
+                  <p>Supports PNG, JPG, JPEG, WEBP</p>
+                </div>
+              </div>
+
+              <div class="time-slider-group">
+                <label for="home-time-elapsed">Time since food preparation / opening: <span class="highlight-val" id="home-time-display">2 hours</span></label>
+                <input type="range" id="home-time-elapsed" min="0" max="72" value="2" step="1" class="slider-custom-home">
+                <div class="slider-labels">
+                  <span>Fresh (0h)</span>
+                  <span>1 day (24h)</span>
+                  <span>2 days (48h)</span>
+                  <span>3+ days (72h)</span>
+                </div>
+              </div>
+
+              <button type="button" id="home-analyze-btn" class="btn-primary-hero analyze-trigger-btn" disabled>
+                ⚡ Run CNN Freshness Scan
+              </button>
+            </div>
+
+            <!-- Analysis Preview / Laser Box -->
+            <div id="home-scan-wrapper" class="home-scan-wrapper" style="display:none;">
+              <div class="scanner-image-frame-home">
+                <img id="home-preview-img" src="" alt="Food Upload">
+                <div class="laser-beam-home" id="home-laser"></div>
+              </div>
+              <div id="home-scan-status-label" class="scan-status-msg-home">⏳ Initiating multi-parameter image analysis...</div>
+            </div>
+
+            <!-- Analysis Diagnostic Dashboard Output -->
+            <div id="home-analysis-results" class="analysis-results-container"></div>
+          </div>
+        </div>
+      </section>
 
       <section class="donate" id="donate">
         <span class="section-subtitle">Categories</span>
@@ -462,6 +508,37 @@
         <div class="form-group">
           <label for="message">Message</label>
           <textarea id="message" name="message" rows="2" placeholder="Any special instructions?"></textarea>
+        </div>
+
+        <!-- AI Food Freshness Verification in Modal -->
+        <div class="form-group ai-modal-scanner-group" id="modal-scanner-box">
+          <label style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-weight: 600; color: #008080;">🤖 AI Freshness Verification (Recommended)</span>
+            <span class="badge-tag-mini">CNN Powered</span>
+          </label>
+          <div class="modal-upload-wrapper">
+            <input type="file" id="modal-food-image" accept="image/*" style="display:none;">
+            <button type="button" id="modal-upload-trigger" class="button-33 upload-btn-custom" style="width: 100%; background: #008080; text-align: center; padding: 10px;">
+              📸 Upload Food Picture to Test Quality
+            </button>
+          </div>
+          <div class="modal-time-wrapper" style="margin-top: 12px;">
+            <label for="modal-time-elapsed" style="font-size: 0.9em;">Time since prepared / cooked: <strong id="modal-time-display">0 hours</strong></label>
+            <input type="range" id="modal-time-elapsed" min="0" max="72" value="0" step="1" class="slider-custom-home" style="width: 100%; margin-top: 6px;">
+          </div>
+          <div id="modal-scan-preview" class="scan-preview-container" style="display:none; margin-top: 15px;">
+            <div class="scanner-image-frame">
+              <img id="modal-preview-img" src="" alt="Food preview">
+              <div class="laser-beam"></div>
+            </div>
+            <div id="modal-scan-status" class="scan-status-msg">Analyzing image via CNN algorithms...</div>
+          </div>
+          <div id="modal-scan-result" style="margin-top: 15px;"></div>
+          
+          <input type="hidden" id="freshnessScore" name="freshnessScore">
+          <input type="hidden" id="freshnessStatus" name="freshnessStatus">
+          <input type="hidden" id="freshnessParameters" name="freshnessParameters">
+          <input type="hidden" id="scannedImagePreview" name="scannedImagePreview">
         </div>
 
         <button type="submit" class="button-33 submit-btn">Submit Donation</button>
