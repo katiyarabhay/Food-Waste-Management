@@ -622,4 +622,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inputFreshnessParams) inputFreshnessParams.value = "";
         }
     }
+
+    // ==========================================================
+    // DONATION CAROUSEL HORIZONTAL SCROLL CONTROLS
+    // ==========================================================
+    const donationCarousel = document.getElementById('donation-options-carousel');
+    const donatePrevBtn = document.getElementById('donate-prev-btn');
+    const donateNextBtn = document.getElementById('donate-next-btn');
+
+    if (donationCarousel && donatePrevBtn && donateNextBtn) {
+        donatePrevBtn.addEventListener('click', () => {
+            donationCarousel.scrollBy({ left: -320, behavior: 'smooth' });
+        });
+        donateNextBtn.addEventListener('click', () => {
+            donationCarousel.scrollBy({ left: 320, behavior: 'smooth' });
+        });
+    }
 });

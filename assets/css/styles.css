@@ -358,17 +358,83 @@ main {
   line-height: 1.8;
 }
 
-/* Donation Options */
+/* Donation Carousel & Options Band */
+.donation-carousel-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 10px 55px;
+  margin-top: 25px;
+}
+
 .donation-options {
-  /* background:url("vecteezy_light-green-abstract-illustration-like-marble-pattern-and_7262194.jpg");*/
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  grid-gap: 20px;
-  margin-top: solid
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 24px;
+  padding: 10px 5px;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  width: 100%;
+}
+
+.donation-options::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
+}
+
+.carousel-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-xl);
+}
+
+.prev-btn {
+  left: 0;
+}
+
+.next-btn {
+  right: 0;
+}
+
+@media (max-width: 768px) {
+  .donation-carousel-wrapper {
+    padding: 10px 0;
+  }
+  .carousel-btn {
+    display: none; /* Swipe on touch screens */
+  }
+  .donation-card {
+    flex: 0 0 260px;
+  }
 }
 
 /* Donation Card Base Styles */
 .donation-card {
+  flex: 0 0 290px;
+  scroll-snap-align: start;
   background-color: var(--white);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
@@ -779,37 +845,49 @@ h1 {
 
 /* Hero Section */
 .hero-section {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(0, 128, 128, 0.75) 100%), url("../images/header.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  border-radius: var(--radius-lg);
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
-  gap: 40px;
+  gap: 50px;
   align-items: center;
-  padding: 120px 0 60px 0; /* Clear fixed navbar */
-  min-height: 80vh;
+  padding: 60px 65px;
+  width: 96% !important;
+  max-width: 1650px !important;
+  margin: 110px auto 50px auto !important;
+  min-height: 75vh;
+  box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 @media (max-width: 992px) {
   .hero-section {
     grid-template-columns: 1fr;
     text-align: center;
-    padding: 100px 0 40px 0;
+    padding: 50px 25px;
+    width: 94% !important;
+    margin: 90px auto 40px auto !important;
   }
 }
 
 .hero-content h1 {
   font-size: 3.5rem;
   line-height: 1.15;
-  color: var(--text-dark);
+  color: var(--white);
   margin-bottom: 20px;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .hero-content p {
   font-size: 1.2rem;
-  color: var(--text-muted);
-  margin-bottom: 30px;
+  color: #e2e8f0;
+  margin-bottom: 35px;
   max-width: 600px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  line-height: 1.7;
 }
 
 .hero-buttons {
