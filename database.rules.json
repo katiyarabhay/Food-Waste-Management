@@ -1,0 +1,38 @@
+{
+  "rules": {
+    "donations": {
+      // Allowed to be read by authenticated users (needed for history, admin, and delivery dashboards)
+      ".read": "auth != null",
+      "$donationId": {
+        // Anyone (including guests) can submit a new donation
+        // Existing donations can only be updated/modified by Admins, the assigned Delivery Partner, or the user who created it
+        ".write": "!data.exists() || (auth != null && (root.child('users/' + auth.uid + '/role').val() === 'admin' || data.child('userId').val() === auth.uid || auth.uid === newData.child('assignedTo').val() || data.child('assignedTo').val() === auth.uid))"
+      }
+    },
+    "users": {
+      // Admins can read all users profiles
+      ".read": "auth != null && root.child('users/' + auth.uid + '/role').val() === 'admin'",
+      "$uid": {
+        // Users can read their own profile, and read/write access is granted to the user themselves or Admins
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users/' + auth.uid + '/role').val() === 'admin')"
+      }
+    },
+    "locations": {
+      // Authenticated users (donors) can read live location tracking of delivery heroes
+      ".read": "auth != null",
+      "$uid": {
+        // Only the delivery partner can write/update their own live location
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "feedback": {
+      // Admins can read feedback responses
+      ".read": "auth != null && root.child('users/' + auth.uid + '/role').val() === 'admin'",
+      "$feedbackId": {
+        // Anyone (including guests) can submit new feedback
+        ".write": "!data.exists()"
+      }
+    }
+  }
+}
