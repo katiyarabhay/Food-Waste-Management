@@ -8,6 +8,7 @@
   <title>HappiPlates - Food Waste Management System</title>
   <link rel="icon" href="assets/images/Untitled design (1).png" type="image/x-icon">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/chatbot.css">
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -487,7 +488,6 @@
             <option value="Vegetables">Vegetables</option>
             <option value="Spices">Spices</option>
             <option value="Fruits">Fruits</option>
-            <option value="Funds">Funds</option>
             <option value="Other">Other</option>
           </select>
         </div>
@@ -550,6 +550,106 @@
     </div>
   </div>
 
+  <!-- Funds Donation Modal -->
+  <div id="funds-modal" class="modal">
+    <div class="modal-content" style="max-width: 520px;">
+      <span class="close-btn" id="close-funds-btn">&times;</span>
+      <h2 style="text-align: center; margin-bottom: 5px;">Donate Funds</h2>
+      <p style="text-align: center; color: #666; font-size: 0.9em; margin-bottom: 20px;">100% of your contribution feeds nutritious meals to communities in need.</p>
+
+      <!-- Payment Method Selection -->
+      <div class="payment-method-selector" style="display: flex; gap: 10px; margin-bottom: 20px; background: #f1f5f9; padding: 4px; border-radius: 30px;">
+        <button type="button" id="pay-method-upi" class="pay-method-btn active" style="flex: 1; padding: 10px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; background: #008080; color: white; transition: all 0.3s;">
+          ⚡ Direct UPI (0% Fee)
+        </button>
+        <button type="button" id="pay-method-razorpay" class="pay-method-btn" style="flex: 1; padding: 10px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; background: transparent; color: #475569; transition: all 0.3s;">
+          💳 Razorpay Gateway
+        </button>
+      </div>
+
+      <form id="funds-form">
+        <div class="form-group">
+          <label for="funds-name">Full Name</label>
+          <input type="text" id="funds-name" name="name" required placeholder="Enter your name">
+        </div>
+
+        <div class="form-group">
+          <label for="funds-email">Email Address</label>
+          <input type="email" id="funds-email" name="email" required placeholder="Enter your email">
+        </div>
+
+        <div class="form-group">
+          <label for="funds-phone">Phone Number</label>
+          <input type="tel" id="funds-phone" name="phone" placeholder="Enter your phone number">
+        </div>
+
+        <div class="form-group">
+          <label for="funds-amount">Donation Amount (₹)</label>
+          <input type="number" id="funds-amount" name="quantity" min="1" value="500" required placeholder="Enter amount (e.g. ₹500)">
+          <!-- Preset Amount Chips -->
+          <div class="preset-amount-chips" style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+            <button type="button" class="amount-chip-btn" data-val="100" style="padding: 4px 10px; border-radius: 15px; border: 1px solid #008080; background: #e6f2f2; color: #008080; font-size: 0.85em; font-weight: 600; cursor: pointer;">₹100</button>
+            <button type="button" class="amount-chip-btn" data-val="250" style="padding: 4px 10px; border-radius: 15px; border: 1px solid #008080; background: #e6f2f2; color: #008080; font-size: 0.85em; font-weight: 600; cursor: pointer;">₹250</button>
+            <button type="button" class="amount-chip-btn" data-val="500" style="padding: 4px 10px; border-radius: 15px; border: 1px solid #008080; background: #008080; color: white; font-size: 0.85em; font-weight: 600; cursor: pointer;">₹500</button>
+            <button type="button" class="amount-chip-btn" data-val="1000" style="padding: 4px 10px; border-radius: 15px; border: 1px solid #008080; background: #e6f2f2; color: #008080; font-size: 0.85em; font-weight: 600; cursor: pointer;">₹1000</button>
+            <button type="button" class="amount-chip-btn" data-val="2000" style="padding: 4px 10px; border-radius: 15px; border: 1px solid #008080; background: #e6f2f2; color: #008080; font-size: 0.85em; font-weight: 600; cursor: pointer;">₹2000</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="funds-message">Message (Optional)</label>
+          <textarea id="funds-message" name="message" rows="2" placeholder="Write a supportive message..."></textarea>
+        </div>
+
+        <!-- Direct UPI Display Container (Shown when UPI mode active) -->
+        <div id="upi-payment-details-box" style="margin-top: 20px; padding: 16px; background: #f8fafc; border: 1.5px dashed #008080; border-radius: 12px; text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
+            <span style="font-size: 1.2em;">📱</span>
+            <h4 style="margin: 0; color: #008080;">Live Dynamic UPI QR Code</h4>
+            <span id="live-qr-badge" style="background: #22c55e; color: white; font-size: 0.75em; font-weight: 700; padding: 2px 8px; border-radius: 10px; animation: pulse 2s infinite;">LIVE: ₹500</span>
+          </div>
+
+          <div id="upi-qr-frame" style="margin: 10px auto; display: inline-block; background: white; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; position: relative;">
+            <img id="upi-qr-image" src="" alt="Live UPI QR Code" style="width: 170px; height: 170px; display: block; margin: 0 auto; transition: opacity 0.2s;">
+            <span style="font-size: 0.8em; color: #475569; display: block; margin-top: 6px; font-weight: 500;">Scan with GPay, PhonePe, Paytm, BHIM</span>
+          </div>
+
+          <div style="margin: 10px 0; font-size: 0.9em; background: #e2e8f0; padding: 8px 12px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+            <span>UPI ID: <strong id="upi-vpa-display">6387279295@pthdfc</strong></span>
+            <button type="button" id="copy-upi-btn" style="background: #008080; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.8em; cursor: pointer;">Copy</button>
+          </div>
+
+          <a id="upi-mobile-link" href="#" style="display: inline-block; width: 100%; box-sizing: border-box; background: #2563eb; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.9em; margin-bottom: 15px; text-align: center;">
+            📲 Open UPI App on Mobile
+          </a>
+
+          <!-- Payment Screenshot Upload -->
+          <div class="form-group" style="text-align: left; margin-bottom: 0;">
+            <label for="upi-screenshot-input" style="font-weight: 600; color: #1e293b; display: block; margin-bottom: 6px;">
+              📸 Upload Payment Screenshot <span style="color: red;">*</span>
+            </label>
+            <div id="upi-screenshot-dropzone" style="border: 2px dashed #008080; border-radius: 8px; padding: 14px; text-align: center; background: #ffffff; cursor: pointer; transition: background 0.2s;">
+              <input type="file" id="upi-screenshot-input" accept="image/*" style="display: none;">
+              <div id="upi-screenshot-label">
+                <span style="font-size: 1.5em; display: block; margin-bottom: 4px;">🖼️</span>
+                <span style="font-size: 0.9em; font-weight: 600; color: #008080;">Click or Drag & Drop Payment Screenshot</span>
+                <span style="font-size: 0.78em; color: #64748b; display: block; margin-top: 2px;">PNG, JPG, JPEG, WEBP accepted</span>
+              </div>
+              <div id="upi-screenshot-preview-container" style="display: none; margin-top: 8px;">
+                <img id="upi-screenshot-preview" src="" alt="Payment Screenshot Preview" style="max-height: 140px; border-radius: 6px; border: 1px solid #cbd5e1; display: inline-block;">
+                <span id="upi-screenshot-name" style="display: block; font-size: 0.8em; color: #10b981; font-weight: 600; margin-top: 4px;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="funds-submit-btn" class="button-33 submit-btn" style="width: 100%; margin-top: 20px; background: #008080;">
+          Submit Direct UPI Donation
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Location Picker Modal -->
   <div id="location-modal">
     <div id="location-map-container">
@@ -563,6 +663,9 @@
     </div>
   </div>
 
+
+
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -570,7 +673,9 @@
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
   
   <script src="assets/js/firebase-config.js" type="module"></script>
+  <!-- Razorpay Standard Checkout SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="assets/js/script.js?v=1.1" type="module"></script>
+  <script src="assets/js/chatbot.js" type="module"></script>
 </body>
-
 </html>

@@ -4,12 +4,18 @@
   "description": "HappiPlates - Food Waste Management System",
   "private": true,
   "scripts": {
-    "dev": "npx -y serve@latest . -l 3000"
+    "dev": "node server.js"
   },
   "keywords": [
     "food-waste",
     "donation"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "razorpay": "^2.9.8"
+  }
 }

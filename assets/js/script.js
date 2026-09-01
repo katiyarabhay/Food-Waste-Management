@@ -68,13 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Prefill donation modal inputs
             const nameInput = document.getElementById('name');
             const emailInput = document.getElementById('email');
+            const fundsNameInput = document.getElementById('funds-name');
+            const fundsEmailInput = document.getElementById('funds-email');
 
-            if (nameInput && user.displayName) {
-                nameInput.value = user.displayName;
-            }
-            if (emailInput && user.email) {
-                emailInput.value = user.email;
-            }
+            if (nameInput && user.displayName) nameInput.value = user.displayName;
+            if (emailInput && user.email) emailInput.value = user.email;
+            if (fundsNameInput && user.displayName) fundsNameInput.value = user.displayName;
+            if (fundsEmailInput && user.email) fundsEmailInput.value = user.email;
 
             // Show Logout
             if (logoutBtn) {
@@ -94,14 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Open Modal
+    const fundsModal = document.getElementById('funds-modal');
     donateButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const category = button.getAttribute('data-category');
-            if (category) {
-                categorySelect.value = category;
+            if (category === 'Funds') {
+                if (fundsModal) fundsModal.style.display = 'block';
+            } else {
+                if (category) {
+                    categorySelect.value = category;
+                }
+                modal.style.display = 'block';
             }
-            modal.style.display = 'block';
         });
 
         // Location Capture
@@ -253,14 +258,24 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.style.display = 'none';
     });
 
+    const fundsCloseBtn = document.getElementById('close-funds-btn');
+    if (fundsCloseBtn) {
+        fundsCloseBtn.addEventListener('click', () => {
+            if (fundsModal) fundsModal.style.display = 'none';
+        });
+    }
+
     // Close if clicked outside
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.style.display = 'none';
         }
+        if (fundsModal && e.target === fundsModal) {
+            fundsModal.style.display = 'none';
+        }
     });
 
-    // Handle Form Submission
+    // Handle Form Submission for Food Donations
     donationForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -294,14 +309,10 @@ document.addEventListener('DOMContentLoaded', () => {
             await set(newDonationRef, data);
 
             console.log("Donation saved with ID: ", newDonationRef.key);
-
-            // Success Message
             alert(`Thank you, ${data.name}! We have received your request to donate ${data.category}. We will contact you at ${data.phone || data.email} shortly.`);
 
-            // Reset and Close
             donationForm.reset();
             modal.style.display = 'none';
-
         } catch (error) {
             console.error("Error adding donation: ", error);
             alert("Error submitting donation. Please check your internet connection or try again later. \n\nDebug info: " + error.message);
@@ -310,6 +321,366 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = false;
         }
     });
+
+    // Handle Funds Form & Direct UPI Payment Logic
+    const fundsForm = document.getElementById('funds-form');
+    const payMethodUpiBtn = document.getElementById('pay-method-upi');
+    const payMethodRazorpayBtn = document.getElementById('pay-method-razorpay');
+    const upiBox = document.getElementById('upi-payment-details-box');
+    const fundsSubmitBtn = document.getElementById('funds-submit-btn');
+    const fundsAmountInput = document.getElementById('funds-amount');
+    const upiQrImage = document.getElementById('upi-qr-image');
+    const upiVpaDisplay = document.getElementById('upi-vpa-display');
+    const copyUpiBtn = document.getElementById('copy-upi-btn');
+    const upiMobileLink = document.getElementById('upi-mobile-link');
+    const upiUtrInput = document.getElementById('upi-utr-id');
+
+    let currentPaymentMode = 'upi'; // 'upi' or 'razorpay'
+    let configuredUpiId = '6387279295@pthdfc';
+    let configuredUpiName = 'HappiPlates Foundation';
+    let currentScreenshotDataUrl = null;
+
+    // Screenshot Drag & Drop Handling
+    const upiScreenshotDropzone = document.getElementById('upi-screenshot-dropzone');
+    const upiScreenshotInput = document.getElementById('upi-screenshot-input');
+    const upiScreenshotPreviewContainer = document.getElementById('upi-screenshot-preview-container');
+    const upiScreenshotPreview = document.getElementById('upi-screenshot-preview');
+    const upiScreenshotName = document.getElementById('upi-screenshot-name');
+    const upiScreenshotLabel = document.getElementById('upi-screenshot-label');
+
+    if (upiScreenshotDropzone && upiScreenshotInput) {
+        upiScreenshotDropzone.addEventListener('click', () => upiScreenshotInput.click());
+
+        upiScreenshotDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            upiScreenshotDropzone.style.background = '#f0fdf4';
+            upiScreenshotDropzone.style.borderColor = '#10b981';
+        });
+
+        upiScreenshotDropzone.addEventListener('dragleave', () => {
+            upiScreenshotDropzone.style.background = '#ffffff';
+            upiScreenshotDropzone.style.borderColor = '#008080';
+        });
+
+        upiScreenshotDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            upiScreenshotDropzone.style.background = '#ffffff';
+            upiScreenshotDropzone.style.borderColor = '#008080';
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                processScreenshotFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        upiScreenshotInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                processScreenshotFile(e.target.files[0]);
+            }
+        });
+
+        function processScreenshotFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert("Please select a valid screenshot image file (PNG, JPG, JPEG, WEBP).");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentScreenshotDataUrl = e.target.result;
+                if (upiScreenshotPreview) upiScreenshotPreview.src = currentScreenshotDataUrl;
+                if (upiScreenshotName) upiScreenshotName.textContent = `Attached: ${file.name}`;
+                if (upiScreenshotPreviewContainer) upiScreenshotPreviewContainer.style.display = 'block';
+                if (upiScreenshotLabel) upiScreenshotLabel.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Fetch UPI Configuration
+    async function loadUpiConfig() {
+        try {
+            const res = await fetch('/api/upi-config');
+            if (res.ok) {
+                const data = await res.json();
+                configuredUpiId = data.upi_id || '6387279295@pthdfc';
+                configuredUpiName = data.upi_name || 'HappiPlates Foundation';
+            }
+        } catch (e) {
+            console.warn("Using fallback UPI ID", e);
+        }
+        if (upiVpaDisplay) upiVpaDisplay.textContent = configuredUpiId;
+        updateUpiQrAndLink();
+    }
+
+    const liveQrBadge = document.getElementById('live-qr-badge');
+    const amountChips = document.querySelectorAll('.amount-chip-btn');
+
+    function updateUpiQrAndLink() {
+        const amountVal = parseFloat(fundsAmountInput ? fundsAmountInput.value : 0) || 100;
+        const upiUri = `upi://pay?pa=${configuredUpiId}&pn=${encodeURIComponent(configuredUpiName)}&am=${amountVal}&cu=INR&tn=Donation`;
+        
+        if (upiQrImage) {
+            upiQrImage.style.opacity = '0.6';
+            upiQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+            upiQrImage.onload = () => { upiQrImage.style.opacity = '1'; };
+        }
+        if (upiMobileLink) {
+            upiMobileLink.href = upiUri;
+        }
+        if (liveQrBadge) {
+            liveQrBadge.textContent = `LIVE: ₹${amountVal}`;
+        }
+    }
+
+    if (fundsAmountInput) {
+        fundsAmountInput.addEventListener('input', () => {
+            updateUpiQrAndLink();
+            const currentVal = fundsAmountInput.value;
+            amountChips.forEach(chip => {
+                if (chip.getAttribute('data-val') === currentVal) {
+                    chip.style.background = '#008080';
+                    chip.style.color = 'white';
+                } else {
+                    chip.style.background = '#e6f2f2';
+                    chip.style.color = '#008080';
+                }
+            });
+        });
+    }
+
+    amountChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const val = chip.getAttribute('data-val');
+            if (fundsAmountInput) {
+                fundsAmountInput.value = val;
+                updateUpiQrAndLink();
+            }
+            amountChips.forEach(c => {
+                c.style.background = '#e6f2f2';
+                c.style.color = '#008080';
+            });
+            chip.style.background = '#008080';
+            chip.style.color = 'white';
+        });
+    });
+
+    if (copyUpiBtn) {
+        copyUpiBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(configuredUpiId);
+            const originalText = copyUpiBtn.textContent;
+            copyUpiBtn.textContent = 'Copied! ✅';
+            setTimeout(() => { copyUpiBtn.textContent = originalText; }, 2000);
+        });
+    }
+
+    // Toggle Payment Method Tabs
+    if (payMethodUpiBtn && payMethodRazorpayBtn) {
+        payMethodUpiBtn.addEventListener('click', () => {
+            currentPaymentMode = 'upi';
+            payMethodUpiBtn.style.background = '#008080';
+            payMethodUpiBtn.style.color = 'white';
+            payMethodRazorpayBtn.style.background = 'transparent';
+            payMethodRazorpayBtn.style.color = '#475569';
+            if (upiBox) upiBox.style.display = 'block';
+            if (fundsSubmitBtn) fundsSubmitBtn.textContent = 'Submit Direct UPI Donation';
+        });
+
+        payMethodRazorpayBtn.addEventListener('click', () => {
+            currentPaymentMode = 'razorpay';
+            payMethodRazorpayBtn.style.background = '#008080';
+            payMethodRazorpayBtn.style.color = 'white';
+            payMethodUpiBtn.style.background = 'transparent';
+            payMethodUpiBtn.style.color = '#475569';
+            if (upiBox) upiBox.style.display = 'none';
+            if (fundsSubmitBtn) fundsSubmitBtn.textContent = 'Proceed with Razorpay Checkout';
+        });
+    }
+
+    // Load UPI config when opening modal
+    if (fundsModal) {
+        loadUpiConfig();
+    }
+
+    if (fundsForm) {
+        fundsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = fundsSubmitBtn || fundsForm.querySelector('.submit-btn');
+            const originalBtnText = submitBtn.innerText;
+
+            const formData = new FormData(fundsForm);
+            const data = Object.fromEntries(formData);
+            const amount = parseFloat(data.quantity);
+
+            if (isNaN(amount) || amount < 1) {
+                alert("Please enter a valid amount of at least ₹1.");
+                return;
+            }
+
+            data.timestamp = new Date().toISOString();
+            data.category = "Funds";
+            const user = auth.currentUser;
+            if (user) {
+                data.userId = user.uid;
+                data.linkedUserEmail = user.email;
+            }
+
+            // MODE 1: Direct UPI Payment with Screenshot
+            if (currentPaymentMode === 'upi') {
+                if (!currentScreenshotDataUrl) {
+                    alert("Please upload a screenshot of your payment receipt to complete donation submission.");
+                    if (upiScreenshotDropzone) upiScreenshotDropzone.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Submitting UPI Screenshot...';
+
+                data.status = "Pending Verification";
+                data.paymentMethod = "Direct UPI";
+                data.quantity = `₹${amount}`;
+                data.paymentScreenshot = currentScreenshotDataUrl;
+
+                try {
+                    // 1. Record via backend API
+                    await fetch('/api/record-upi-donation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: data.name,
+                            email: data.email,
+                            phone: data.phone,
+                            amount: amount,
+                            screenshot: currentScreenshotDataUrl,
+                            message: data.message
+                        })
+                    });
+
+                    // 2. Save to Firebase Realtime Database
+                    const donationsRef = ref(db, 'donations');
+                    const newDonationRef = push(donationsRef);
+                    await set(newDonationRef, data);
+
+                    alert(`Thank you, ${data.name}! Your Direct UPI Donation of ₹${amount} with Payment Screenshot has been submitted for verification.`);
+                    fundsForm.reset();
+                    currentScreenshotDataUrl = null;
+                    if (upiScreenshotPreviewContainer) upiScreenshotPreviewContainer.style.display = 'none';
+                    if (upiScreenshotLabel) upiScreenshotLabel.style.display = 'block';
+                    if (fundsModal) fundsModal.style.display = 'none';
+                } catch (err) {
+                    console.error("Error submitting UPI donation screenshot:", err);
+                    alert("Error submitting UPI donation: " + err.message);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalBtnText;
+                }
+                return;
+            }
+
+            // MODE 2: Razorpay Payment Gateway
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Initializing Razorpay...';
+
+            try {
+                // Fetch Key ID
+                const configRes = await fetch('/api/config');
+                const configData = await configRes.json();
+                if (!configRes.ok || !configData.key_id) {
+                    throw new Error(configData.error || 'Failed to fetch payment configuration');
+                }
+
+                // Create Razorpay Order
+                const orderRes = await fetch('/api/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: Math.round(amount * 100), // convert to paise
+                        currency: 'INR'
+                    })
+                });
+                const orderData = await orderRes.json();
+                if (!orderRes.ok || !orderData.order_id) {
+                    throw new Error(orderData.error || 'Failed to create payment order');
+                }
+
+                // Initialize Checkout Modal
+                const options = {
+                    key: configData.key_id,
+                    amount: orderData.amount,
+                    currency: orderData.currency,
+                    name: "HappiPlates",
+                    description: "Donation of Funds",
+                    order_id: orderData.order_id,
+                    handler: async function (response) {
+                        submitBtn.innerText = 'Verifying Payment...';
+                        try {
+                            const verifyRes = await fetch('/api/verify-payment', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_signature: response.razorpay_signature
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+                            if (verifyRes.ok && verifyData.success) {
+                                data.status = "Paid";
+                                data.paymentMethod = "Razorpay";
+                                data.razorpayPaymentId = response.razorpay_payment_id;
+                                data.razorpayOrderId = response.razorpay_order_id;
+                                data.razorpaySignature = response.razorpay_signature;
+                                data.quantity = `₹${amount}`;
+
+                                const donationsRef = ref(db, 'donations');
+                                const newDonationRef = push(donationsRef);
+                                await set(newDonationRef, data);
+
+                                alert(`Thank you, ${data.name}! Your donation of ₹${amount} has been successfully received.`);
+                                fundsForm.reset();
+                                if (fundsModal) fundsModal.style.display = 'none';
+                            } else {
+                                alert("Payment verification failed: " + (verifyData.error || 'Signature mismatch'));
+                            }
+                        } catch (verifyErr) {
+                            console.error("Verification error:", verifyErr);
+                            alert("Error verifying payment: " + verifyErr.message);
+                        } finally {
+                            submitBtn.innerText = originalBtnText;
+                            submitBtn.disabled = false;
+                        }
+                    },
+                    prefill: {
+                        name: data.name || '',
+                        email: data.email || '',
+                        contact: data.phone || ''
+                    },
+                    theme: {
+                        color: "#008080"
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            alert("Payment cancelled.");
+                            submitBtn.innerText = originalBtnText;
+                            submitBtn.disabled = false;
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (response) {
+                    alert(`Payment failed: ${response.error.description}`);
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.disabled = false;
+                });
+                rzp.open();
+
+            } catch (err) {
+                console.error("Payment setup error:", err);
+                alert("Failed to initialize payment: " + err.message);
+                submitBtn.innerText = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
 
     // Logout Functionality
     const logoutBtn = document.getElementById('logout-btn');
@@ -528,11 +899,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (categorySelect && modalScannerBox) {
         const toggleScannerVisibility = () => {
-            if (categorySelect.value === 'Funds') {
-                modalScannerBox.style.display = 'none';
-            } else {
-                modalScannerBox.style.display = 'block';
-            }
+            modalScannerBox.style.display = 'block';
         };
         categorySelect.addEventListener('change', toggleScannerVisibility);
         donateButtons.forEach(btn => btn.addEventListener('click', () => setTimeout(toggleScannerVisibility, 50)));
