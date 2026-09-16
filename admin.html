@@ -374,11 +374,20 @@
         </div>
     </div>
 
-    <!-- Map Modal -->
-    <div id="map-modal">
-        <div id="map-container">
-            <span class="close-map">&times;</span>
-            <div id="map"></div>
+    <!-- Payment Proof & UTR Modal -->
+    <div id="proof-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <span class="close-btn" id="close-proof-modal">&times;</span>
+            <h3>💳 Payment Proof & UTR Inspection</h3>
+            <div id="proof-utr-badge-container" style="margin: 10px 0;"></div>
+            <div id="proof-image-container" style="margin-top: 15px;">
+                <img id="proof-modal-img" src="" alt="Payment Proof" style="max-width: 100%; max-height: 350px; border-radius: 8px; border: 1px solid #ddd;">
+            </div>
+            <div id="proof-details" style="margin-top: 15px; font-size: 0.9em; text-align: left; background: #f8fafc; padding: 12px; border-radius: 6px;"></div>
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; gap: 10px;">
+                <button type="button" id="admin-verify-utr-btn" class="action-btn btn-approve" style="flex: 1; padding: 10px; font-size: 0.95em;">✓ Mark UTR Verified & Accept</button>
+                <button type="button" id="admin-reject-utr-btn" class="action-btn btn-reject" style="padding: 10px; font-size: 0.95em;">Reject</button>
+            </div>
         </div>
     </div>
 

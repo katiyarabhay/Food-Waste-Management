@@ -121,7 +121,7 @@ viewFeedbackBtn.addEventListener('click', () => {
 
 
 // --- Donation Logic ---
-let allUsersCache = []; // Store users to map UIDs to Names
+let currentDonationsCache = [];
 
 async function loadDonations() {
     donationsList.innerHTML = '';
@@ -141,6 +141,8 @@ async function loadDonations() {
                 ...value
             }));
 
+            currentDonationsCache = donations;
+
             // Metrics
             const total = donations.length;
             const pending = donations.filter(d => !d.status || d.status.toLowerCase() === 'pending').length;
@@ -157,6 +159,7 @@ async function loadDonations() {
                 renderDonationRow(donation);
             });
         } else {
+            currentDonationsCache = [];
             noDataMsg.style.display = 'block';
         }
     } catch (error) {
@@ -190,13 +193,29 @@ function renderDonationRow(donation) {
         ? `<button class="action-btn" style="background-color: #3498db; margin-top:5px;" onclick="viewLocation('${donation.latitude}', '${donation.longitude}', '${donation.name}')"><i class="fas fa-map-marker-alt"></i> View Map</button>`
         : '';
 
+    // UTR & Payment Proof Info
+    let utrBadge = '';
+    if (donation.utr && donation.utr !== 'Screenshot Attached') {
+        const is12Digit = /^\d{12}$/.test(donation.utr);
+        if (is12Digit || donation.utrVerified) {
+            utrBadge = `<br><span style="display:inline-block; font-size:0.75em; background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px; margin-top:4px; font-weight:600;">✓ UTR: ${donation.utr}</span>`;
+        } else {
+            utrBadge = `<br><span style="display:inline-block; font-size:0.75em; background:#fef3c7; color:#b45309; padding:2px 6px; border-radius:4px; margin-top:4px; font-weight:600;">⚠️ UTR: ${donation.utr}</span>`;
+        }
+    } else if (donation.category === 'Funds') {
+        utrBadge = `<br><span style="display:inline-block; font-size:0.75em; background:#f1f5f9; color:#64748b; padding:2px 6px; border-radius:4px; margin-top:4px;">No UTR Provided</span>`;
+    }
+
+    const proofBtn = donation.paymentScreenshot
+        ? `<button class="action-btn" style="background-color: #008080; margin-top:4px;" onclick="inspectProof('${donation.id}')">🖼️ View Proof & UTR</button>`
+        : '';
+
     // Assignment Info
     let assignedName = "-";
     if (donation.assignedTo) {
         const partner = allUsersCache.find(u => u.uid === donation.assignedTo);
         assignedName = partner ? partner.name : "Unknown ID";
     }
-
 
     const isCompleted = ['received', 'completed'].includes(lowerStatus);
     const assignBtn = isCompleted
@@ -208,9 +227,9 @@ function renderDonationRow(donation) {
         <td>${date}</td>
         <td>${donation.name || 'Anonymous'}<br><small>${donation.linkedUserEmail || ''}</small></td>
         <td>${donation.phone || '-'}<br>${donation.email || '-'}</td>
-        <td>${donation.category}</td>
-        <td>${donation.quantity}</td>
-        <td><small>${donation.address || '-'}</small><br>${mapBtn}</td>
+        <td>${donation.category} ${donation.paymentMethod ? `<small>(${donation.paymentMethod})</small>` : ''}</td>
+        <td>${donation.quantity}${utrBadge}</td>
+        <td><small>${donation.address || donation.message || '-'}</small><br>${mapBtn}${proofBtn ? '<br>' + proofBtn : ''}</td>
         <td><span class="${statusClass}">${statusText}</span></td>
         <td>${assignedName}</td>
         <td>
@@ -395,11 +414,12 @@ async function assignToPartner(donationId, partnerUid) {
 closeAssignmentBtn.onclick = () => assignmentModal.style.display = 'none';
 window.onclick = (e) => {
     if (e.target == assignmentModal) assignmentModal.style.display = 'none';
-    if (e.target == mapModal) mapModal.style.display = 'none';
     const settingsModal = document.getElementById('settings-modal');
     if (e.target == settingsModal) settingsModal.style.display = 'none';
-    const mapModalEl = document.getElementById('map-modal'); // Re-declared to be safe
+    const mapModalEl = document.getElementById('map-modal');
     if (e.target == mapModalEl) mapModalEl.style.display = 'none';
+    const proofModalEl = document.getElementById('proof-modal');
+    if (e.target == proofModalEl) proofModalEl.style.display = 'none';
 };
 
 
@@ -448,7 +468,97 @@ window.viewLocation = (lat, lng, name) => {
     }, 100);
 };
 
+// --- UTR & Payment Proof Inspection Modal ---
+let activeProofDonationId = null;
+
+window.inspectProof = (donationId) => {
+    const donation = currentDonationsCache.find(d => d.id === donationId);
+    if (!donation) return alert("Donation record not found.");
+
+    activeProofDonationId = donationId;
+    const modal = document.getElementById('proof-modal');
+    const imgEl = document.getElementById('proof-modal-img');
+    const badgeContainer = document.getElementById('proof-utr-badge-container');
+    const detailsContainer = document.getElementById('proof-details');
+
+    if (imgEl && donation.paymentScreenshot) {
+        imgEl.src = donation.paymentScreenshot;
+    }
+
+    const is12Digit = donation.utr && /^\d{12}$/.test(donation.utr);
+
+    if (badgeContainer) {
+        if (is12Digit || donation.utrVerified) {
+            badgeContainer.innerHTML = `<span style="font-size:1.1em; background:#dcfce7; color:#15803d; padding:6px 14px; border-radius:20px; font-weight:bold; display:inline-block;">✓ Verified 12-Digit UTR: ${donation.utr}</span>`;
+        } else if (donation.utr && donation.utr !== 'Screenshot Attached') {
+            badgeContainer.innerHTML = `<span style="font-size:1.1em; background:#fef3c7; color:#b45309; padding:6px 14px; border-radius:20px; font-weight:bold; display:inline-block;">⚠️ UTR ID: ${donation.utr} (Unverified Format)</span>`;
+        } else {
+            badgeContainer.innerHTML = `<span style="font-size:1.1em; background:#f1f5f9; color:#64748b; padding:6px 14px; border-radius:20px; font-weight:bold; display:inline-block;">🖼️ Payment Screenshot Attached (No UTR)</span>`;
+        }
+    }
+
+    if (detailsContainer) {
+        detailsContainer.innerHTML = `
+            <p><strong>Donor Name:</strong> ${donation.name || 'Anonymous'}</p>
+            <p><strong>Amount:</strong> ${donation.quantity || '-'}</p>
+            <p><strong>Contact:</strong> ${donation.phone || donation.email || '-'}</p>
+            <p><strong>Status:</strong> ${donation.status || 'Pending'}</p>
+            <p><strong>Date:</strong> ${new Date(donation.timestamp).toLocaleString()}</p>
+            ${donation.message ? `<p><strong>Message:</strong> ${donation.message}</p>` : ''}
+        `;
+    }
+
+    if (modal) modal.style.display = 'block';
+};
+
+const closeProofModalBtn = document.getElementById('close-proof-modal');
+if (closeProofModalBtn) {
+    closeProofModalBtn.addEventListener('click', () => {
+        document.getElementById('proof-modal').style.display = 'none';
+    });
+}
+
+const adminVerifyUtrBtn = document.getElementById('admin-verify-utr-btn');
+if (adminVerifyUtrBtn) {
+    adminVerifyUtrBtn.addEventListener('click', async () => {
+        if (!activeProofDonationId) return;
+        try {
+            await update(ref(db, `donations/${activeProofDonationId}`), {
+                status: 'Received',
+                utrVerified: true,
+                utrStatus: 'Verified (12-Digit)',
+                completedTime: Date.now()
+            });
+            alert("Donation payment & UTR marked as Verified!");
+            document.getElementById('proof-modal').style.display = 'none';
+            loadDonations();
+        } catch (e) {
+            alert("Failed to verify UTR: " + e.message);
+        }
+    });
+}
+
+const adminRejectUtrBtn = document.getElementById('admin-reject-utr-btn');
+if (adminRejectUtrBtn) {
+    adminRejectUtrBtn.addEventListener('click', async () => {
+        if (!activeProofDonationId) return;
+        if (!confirm("Are you sure you want to reject this payment/UTR?")) return;
+        try {
+            await update(ref(db, `donations/${activeProofDonationId}`), {
+                status: 'Rejected',
+                utrVerified: false,
+                utrStatus: 'Rejected'
+            });
+            document.getElementById('proof-modal').style.display = 'none';
+            loadDonations();
+        } catch (e) {
+            alert("Failed to reject donation: " + e.message);
+        }
+    });
+}
+
 // Close Map
+
 const closeMap = document.querySelector('.close-map');
 if (closeMap) {
     closeMap.addEventListener('click', () => {

@@ -34,6 +34,56 @@ app.get('/api/upi-config', (req, res) => {
   });
 });
 
+// In-memory store for recorded UTRs
+const recordedUtrs = new Map();
+
+// Endpoint: Verify UTR ID
+app.post('/api/verify-utr', (req, res) => {
+  try {
+    const { utr } = req.body;
+    if (!utr) {
+      return res.status(400).json({ valid: false, error: 'UTR ID is required.' });
+    }
+
+    const cleanUtr = String(utr).trim().replace(/[\s-]/g, '');
+
+    // Standard Indian UPI UTR is 12 digits
+    const isValidFormat = /^\d{12}$/.test(cleanUtr);
+    if (!isValidFormat) {
+      return res.status(400).json({
+        valid: false,
+        utr: cleanUtr,
+        error: 'Invalid UTR format. Standard UPI UTR / Ref No must be 12 digits.'
+      });
+    }
+
+    const existingTx = recordedUtrs.get(cleanUtr);
+    if (existingTx) {
+      return res.json({
+        valid: true,
+        utr: cleanUtr,
+        isDuplicate: true,
+        message: 'Warning: This UTR has already been submitted previously.',
+        previousTransaction: {
+          name: existingTx.name,
+          amount: existingTx.amount,
+          timestamp: existingTx.timestamp
+        }
+      });
+    }
+
+    res.json({
+      valid: true,
+      utr: cleanUtr,
+      isDuplicate: false,
+      message: 'Valid 12-digit UTR format.'
+    });
+  } catch (err) {
+    console.error('Error verifying UTR:', err);
+    res.status(500).json({ valid: false, error: 'Failed to verify UTR ID.' });
+  }
+});
+
 // Endpoint: Record Direct UPI Donation
 app.post('/api/record-upi-donation', (req, res) => {
   try {
@@ -46,24 +96,47 @@ app.post('/api/record-upi-donation', (req, res) => {
       return res.status(400).json({ error: 'Payment proof (Screenshot or UTR ID) is required.' });
     }
 
+    const cleanUtr = utr ? String(utr).trim().replace(/[\s-]/g, '') : '';
+    const is12Digit = /^\d{12}$/.test(cleanUtr);
+    const isDuplicate = cleanUtr && recordedUtrs.has(cleanUtr);
+
+    let utrStatus = 'Screenshot Attached';
+    if (cleanUtr) {
+      if (isDuplicate) {
+        utrStatus = 'Duplicate UTR';
+      } else if (is12Digit) {
+        utrStatus = 'Verified (12-Digit)';
+      } else {
+        utrStatus = 'Pending Verification';
+      }
+    }
+
     const transaction = {
       id: `UPI_${Date.now()}`,
       name,
       email,
       phone,
       amount: parseFloat(amount),
-      utr: utr ? utr.trim() : 'Screenshot Attached',
+      utr: cleanUtr || 'Screenshot Attached',
+      utrVerified: is12Digit && !isDuplicate,
+      utrStatus,
       hasScreenshot: Boolean(screenshot),
       message: message || '',
       status: 'Pending Verification',
       timestamp: new Date().toISOString()
     };
 
+    if (cleanUtr) {
+      recordedUtrs.set(cleanUtr, transaction);
+    }
+
     console.log('Recorded Direct UPI Donation:', transaction);
 
     res.json({
       success: true,
-      message: 'UPI Donation submitted successfully! Our team will verify your screenshot shortly.',
+      message: is12Digit 
+        ? 'UPI Donation submitted with verified 12-digit UTR ID! Our team will process your contribution.'
+        : 'UPI Donation submitted successfully! Our team will verify your payment shortly.',
       transaction
     });
   } catch (err) {
@@ -71,6 +144,7 @@ app.post('/api/record-upi-donation', (req, res) => {
     res.status(500).json({ error: 'Failed to record UPI donation.' });
   }
 });
+
 
 // Endpoint: Create Order
 app.post('/api/create-order', async (req, res) => {

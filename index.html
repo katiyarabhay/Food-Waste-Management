@@ -623,6 +623,21 @@
             📲 Open UPI App on Mobile
           </a>
 
+          <!-- 12-Digit UTR ID Verification Section -->
+          <div class="form-group" style="text-align: left; margin-bottom: 14px;">
+            <label for="upi-utr-id" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span>🔢 UTR / UPI Ref No (12 Digits)</span>
+              <span id="utr-validation-badge" style="font-size: 0.75em; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #f1f5f9; color: #64748b;">Format Check</span>
+            </label>
+            <div style="position: relative;">
+              <input type="text" id="upi-utr-id" name="utr" maxlength="12" placeholder="e.g. 423456789012 (12-digit Ref No)" style="width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-family: monospace; font-size: 1em; letter-spacing: 1px;">
+            </div>
+            <div id="utr-helper-text" style="font-size: 0.78em; color: #64748b; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Found on GPay, PhonePe, Paytm, BHIM receipt.</span>
+              <button type="button" id="extract-utr-btn" style="background: none; border: none; color: #008080; text-decoration: underline; cursor: pointer; font-weight: 600; display: none;">🔍 Auto-Extract UTR</button>
+            </div>
+          </div>
+
           <!-- Payment Screenshot Upload -->
           <div class="form-group" style="text-align: left; margin-bottom: 0;">
             <label for="upi-screenshot-input" style="font-weight: 600; color: #1e293b; display: block; margin-bottom: 6px;">
