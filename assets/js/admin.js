@@ -38,6 +38,8 @@ const closeAssignmentBtn = document.getElementById('close-assignment');
 const assignmentList = document.getElementById('assignment-list');
 const assignDonationIdInput = document.getElementById('assign-donation-id');
 
+// Caches
+let allUsersCache = [];
 
 // Check Admin Access
 onAuthStateChanged(auth, (user) => {
@@ -353,7 +355,8 @@ window.changeUserRole = async (uid, newRole) => {
         loadPartners(); // Refresh
         // Also refresh donations if viewing them, but we are likely on partners tab
     } catch (e) {
-        alert("Failed to update role");
+        console.error("Error updating user role:", e);
+        alert("Failed to update role: " + (e.message || e));
     }
 };
 
@@ -361,37 +364,54 @@ window.changeUserRole = async (uid, newRole) => {
 // --- Assignment Modal Logic ---
 
 window.openAssignmentModal = async (donationId) => {
+    if (!assignmentModal) return;
     assignmentModal.style.display = 'block';
-    assignDonationIdInput.value = donationId;
-    assignmentList.innerHTML = "Loading partners...";
+    if (assignDonationIdInput) assignDonationIdInput.value = donationId;
+    assignmentList.innerHTML = '<div style="text-align:center; padding:20px; color:#555;"><i class="fas fa-spinner fa-spin"></i> Loading partners...</div>';
 
-    // Fetch partners
-    await loadUsersCache(); // refresh cache
-    const partners = allUsersCache.filter(u => u.role === 'delivery');
+    try {
+        // Fetch partners
+        await loadUsersCache(); // refresh cache
+        const partners = (allUsersCache || []).filter(u => u.role === 'delivery');
 
-    assignmentList.innerHTML = '';
+        assignmentList.innerHTML = '';
 
-    if (partners.length === 0) {
-        assignmentList.innerHTML = "<p>No Delivery Partners found.</p>";
-        return;
+        if (partners.length === 0) {
+            assignmentList.innerHTML = `
+                <div style="text-align:center; padding:25px 15px; color:#666;">
+                    <div style="font-size:1.4em; margin-bottom:8px;">🚚 No Delivery Partners</div>
+                    <p style="margin:0 0 8px 0; font-size:0.9em; color:#888;">There are currently no active delivery partners registered.</p>
+                    <small style="color:#27ae60; font-weight:600;">Go to the Partners tab to promote users to Delivery Partner.</small>
+                </div>`;
+            return;
+        }
+
+        partners.forEach(partner => {
+            const div = document.createElement('div');
+            div.style.padding = "12px 15px";
+            div.style.borderBottom = "1px solid #eee";
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+            div.style.transition = "background-color 0.2s ease";
+            div.onmouseover = () => div.style.backgroundColor = "#f8fafc";
+            div.onmouseout = () => div.style.backgroundColor = "white";
+
+            div.innerHTML = `
+                <div>
+                    <strong style="color:#1e293b; font-size:0.95em;">${partner.name || 'Unnamed Partner'}</strong>
+                    <div style="font-size:0.8em; color:#64748b;">${partner.email || ''}</div>
+                </div>
+                <button class="button-33" style="padding:6px 14px; font-size:12px; background-color:#2ecc71; color:white; border:none; border-radius:4px; cursor:pointer;">Select</button>
+            `;
+
+            div.onclick = () => assignToPartner(donationId, partner.uid);
+            assignmentList.appendChild(div);
+        });
+    } catch (e) {
+        console.error("Error opening assignment modal:", e);
+        assignmentList.innerHTML = `<div style="text-align:center; padding:20px; color:#e74c3c;">Failed to load partners: ${e.message || e}</div>`;
     }
-
-    partners.forEach(partner => {
-        const div = document.createElement('div');
-        div.style.padding = "10px";
-        div.style.borderBottom = "1px solid #eee";
-        div.style.cursor = "pointer";
-        div.style.display = "flex";
-        div.style.justifyContent = "space-between";
-        div.onmouseover = () => div.style.background = "#f5f5f5";
-        div.onmouseout = () => div.style.background = "white";
-
-        div.innerHTML = `<span><strong>${partner.name}</strong> (${partner.email})</span> <button class="button-33" style="padding:4px 8px; font-size:12px;">Select</button>`;
-
-        div.onclick = () => assignToPartner(donationId, partner.uid);
-
-        assignmentList.appendChild(div);
-    });
 };
 
 async function assignToPartner(donationId, partnerUid) {
@@ -434,7 +454,8 @@ window.updateStatus = async (donationId, newStatus) => {
         await update(ref(db, `donations/${donationId}`), updates);
         loadDonations();
     } catch (error) {
-        alert("Failed to update status.");
+        console.error("Error updating status:", error);
+        alert("Failed to update status: " + (error.message || error));
     }
 };
 
