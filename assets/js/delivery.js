@@ -35,9 +35,54 @@ const completedContainer = document.getElementById('completed-tasks-container');
 const noAvailableMsg = document.getElementById('no-available-msg');
 const noTasksMsg = document.getElementById('no-tasks-msg');
 const noHistoryMsg = document.getElementById('no-history-msg');
-// ... (rest of controls)
+const refreshBtn = document.getElementById('refresh-btn');
+const logoutBtn = document.getElementById('logout-btn');
 
-// ...
+// Map Elements & Controls
+const mapModal = document.getElementById('map-modal');
+const closeMapBtn = document.querySelector('.close-map');
+
+// Global State
+let currentUser = null;
+let currentTrackingId = null;
+let watchId = null;
+let map = null;
+let destinationMarker = null;
+let mapMarker = null;
+
+// Auth Access Check
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        try {
+            const snapshot = await get(ref(db, `users/${user.uid}`));
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                if (userData.role === 'delivery' || userData.role === 'admin') {
+                    if (loadingOverlay) loadingOverlay.style.display = 'none';
+                    if (dashboardContent) dashboardContent.style.display = 'block';
+                    loadAssignedDeliveries();
+                } else if (userData.role === 'pending_delivery') {
+                    alert("Your request to become a Delivery Partner is pending Admin approval.");
+                    window.location.href = "index.html";
+                } else {
+                    alert("Access Denied. Delivery Partner permissions required.");
+                    window.location.href = "index.html";
+                }
+            } else {
+                alert("User profile not found. Please log in again.");
+                window.location.href = "login.html";
+            }
+        } catch (e) {
+            console.error("Error checking user role:", e);
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+            if (dashboardContent) dashboardContent.style.display = 'block';
+            loadAssignedDeliveries();
+        }
+    } else {
+        window.location.href = "login.html";
+    }
+});
 
 // Load Deliveries
 async function loadAssignedDeliveries() {
