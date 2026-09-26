@@ -4,4 +4,5 @@
     <string name="title_activity_main">HappiPlates</string>
     <string name="package_name">com.happiplates.app</string>
     <string name="custom_url_scheme">com.happiplates.app</string>
+    <string name="server_client_id">1050027126258-esca7ekn51bo0bleh5o5khl2mft91s53.apps.googleusercontent.com</string>
 </resources>

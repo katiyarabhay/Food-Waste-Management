@@ -149,26 +149,41 @@ const handleGoogleLogin = async () => {
         (navigator.userAgent && (navigator.userAgent.includes('Android') && (navigator.userAgent.includes('wv') || navigator.userAgent.includes('Capacitor'))))
     );
 
-    // If native Google Auth plugin is available in Capacitor
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
+    const googleAuthPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth;
+
+    if (isCapacitorNative && googleAuthPlugin) {
         try {
-            const googleUser = await window.Capacitor.Plugins.GoogleAuth.signIn();
-            const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-            const userCredential = await signInWithCredential(auth, credential);
-            await saveUserProfile(userCredential.user);
-            alert("Google Login Successful! Welcome " + userCredential.user.displayName);
-            redirectUser(userCredential.user);
-            return;
+            if (typeof googleAuthPlugin.initialize === 'function') {
+                await googleAuthPlugin.initialize({
+                    clientId: '1050027126258-esca7ekn51bo0bleh5o5khl2mft91s53.apps.googleusercontent.com',
+                    scopes: ['profile', 'email'],
+                    grantOfflineAccess: true,
+                }).catch(e => console.log('GoogleAuth init:', e));
+            }
+            const googleUser = await googleAuthPlugin.signIn();
+            const idToken = googleUser && (googleUser.authentication?.idToken || googleUser.idToken);
+            if (idToken) {
+                const credential = GoogleAuthProvider.credential(idToken);
+                const userCredential = await signInWithCredential(auth, credential);
+                await saveUserProfile(userCredential.user);
+                alert("Google Login Successful! Welcome " + (userCredential.user.displayName || 'User'));
+                redirectUser(userCredential.user);
+                return;
+            } else {
+                throw new Error("Could not retrieve Google ID Token");
+            }
         } catch (err) {
             console.error("Native Google Auth error:", err);
-            alert("Native Google Login failed: " + err.message);
+            const errStr = String(err.message || err);
+            if (errStr.includes('12501') || errStr.toLowerCase().includes('cancel') || errStr.toLowerCase().includes('dismiss')) {
+                console.log("User cancelled Google Sign-In picker.");
+                return;
+            }
+            alert("Native Google Login failed:\n" + errStr);
             return;
         }
-    }
-
-    // If in Android native APK environment (where Google Web OAuth popups/redirects fail in WebViews)
-    if (isCapacitorNative) {
-        alert("Google Sign-In via browser popup is restricted inside the Android app WebView.\n\nPlease log in using Email & Password below, or sign up with your Email!");
+    } else if (isCapacitorNative) {
+        alert("Google Sign-In is restricted inside native WebView without Google Play Services native plugin.\n\nPlease log in using Email & Password below!");
         return;
     }
 
