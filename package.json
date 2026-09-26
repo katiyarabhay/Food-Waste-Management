@@ -4,7 +4,11 @@
   "description": "HappiPlates - Food Waste Management System",
   "private": true,
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build:www": "node build-www.js",
+    "build:apk": "node build-apk.js",
+    "cap:add": "npx cap add android",
+    "cap:sync": "npx cap sync android"
   },
   "keywords": [
     "food-waste",
@@ -17,5 +21,10 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "razorpay": "^2.9.8"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
   }
 }

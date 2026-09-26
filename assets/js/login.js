@@ -145,6 +145,8 @@ signupForm.addEventListener('submit', async (e) => {
 
 // Handle Google Login
 const handleGoogleLogin = async () => {
+    const isCapacitorNative = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
     try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
@@ -161,14 +163,14 @@ const handleGoogleLogin = async () => {
         const errorMessage = error.message;
         console.error("Google Login Error:", errorCode, errorMessage);
 
-        if (errorCode === 'auth/unauthorized-domain') {
-            alert(`DOMAIN ERROR: The domain '${window.location.hostname}' is not authorized.\n\nGo to Firebase Console > Authentication > Settings > Authorized Domains and add this domain.`);
+        if (isCapacitorNative || errorCode === 'auth/popup-blocked' || errorCode === 'auth/operation-not-supported-in-this-environment') {
+            alert("Google Sign-In Popup is restricted inside the Android app.\n\nPlease log in using Email & Password below, or sign up with your Email!");
+        } else if (errorCode === 'auth/unauthorized-domain') {
+            alert(`DOMAIN ERROR: The domain '${window.location.hostname}' is not authorized.\n\nGo to Firebase Console > Authentication > Settings > Authorized Domains and add 'localhost' to the list.`);
         } else if (errorCode === 'auth/popup-closed-by-user') {
             alert("Login cancelled by user.");
-        } else if (errorCode === 'auth/popup-blocked') {
-            alert("Popup blocked! Please allow popups for this site.");
         } else {
-            alert("Google Login Failed:\n" + errorMessage);
+            alert("Google Login Error:\n" + errorMessage + "\n\nPlease use Email & Password to log in on the app.");
         }
     }
 };

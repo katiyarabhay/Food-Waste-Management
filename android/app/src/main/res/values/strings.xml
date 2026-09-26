@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HappiPlates</string>
+    <string name="title_activity_main">HappiPlates</string>
+    <string name="package_name">com.happiplates.app</string>
+    <string name="custom_url_scheme">com.happiplates.app</string>
+</resources>
