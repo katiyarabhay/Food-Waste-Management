@@ -1,6 +1,6 @@
 import firebaseConfig, { ADMIN_EMAILS } from './firebase-config.js';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
 // Initialize Firebase
@@ -127,9 +127,7 @@ signupForm.addEventListener('submit', async (e) => {
         if (role === 'pending_delivery') {
             alert("Signup Successful! Your request to become a Delivery Partner is pending Admin approval.");
             await signOut(auth); // Force logout so they can't login until approved or they login as regular user (optional logic)
-            // Actually, let's redirect them to a nice page or back to login? 
-            // Or let them login but show restricted access on delivery page.
-            // Let's redirect to index, but if they try to access delivery it will block.
+            // Redirect to index
             window.location.href = "index.html";
         } else {
             alert("Signup Successful! Welcome " + name);
@@ -145,8 +143,36 @@ signupForm.addEventListener('submit', async (e) => {
 
 // Handle Google Login
 const handleGoogleLogin = async () => {
-    const isCapacitorNative = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+    const isCapacitorNative = Boolean(
+        (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) ||
+        window.location.protocol === 'capacitor:' ||
+        (navigator.userAgent && (navigator.userAgent.includes('Android') && (navigator.userAgent.includes('wv') || navigator.userAgent.includes('Capacitor'))))
+    );
 
+    // If native Google Auth plugin is available in Capacitor
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.GoogleAuth) {
+        try {
+            const googleUser = await window.Capacitor.Plugins.GoogleAuth.signIn();
+            const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+            const userCredential = await signInWithCredential(auth, credential);
+            await saveUserProfile(userCredential.user);
+            alert("Google Login Successful! Welcome " + userCredential.user.displayName);
+            redirectUser(userCredential.user);
+            return;
+        } catch (err) {
+            console.error("Native Google Auth error:", err);
+            alert("Native Google Login failed: " + err.message);
+            return;
+        }
+    }
+
+    // If in Android native APK environment (where Google Web OAuth popups/redirects fail in WebViews)
+    if (isCapacitorNative) {
+        alert("Google Sign-In via browser popup is restricted inside the Android app WebView.\n\nPlease log in using Email & Password below, or sign up with your Email!");
+        return;
+    }
+
+    // Standard Web Browser Environment
     try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
@@ -163,9 +189,7 @@ const handleGoogleLogin = async () => {
         const errorMessage = error.message;
         console.error("Google Login Error:", errorCode, errorMessage);
 
-        if (isCapacitorNative || errorCode === 'auth/popup-blocked' || errorCode === 'auth/operation-not-supported-in-this-environment') {
-            alert("Google Sign-In Popup is restricted inside the Android app.\n\nPlease log in using Email & Password below, or sign up with your Email!");
-        } else if (errorCode === 'auth/unauthorized-domain') {
+        if (errorCode === 'auth/unauthorized-domain') {
             alert(`DOMAIN ERROR: The domain '${window.location.hostname}' is not authorized.\n\nGo to Firebase Console > Authentication > Settings > Authorized Domains and add 'localhost' to the list.`);
         } else if (errorCode === 'auth/popup-closed-by-user') {
             alert("Login cancelled by user.");
