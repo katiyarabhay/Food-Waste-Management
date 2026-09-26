@@ -2,6 +2,9 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+console.log('🎨 0. Generating app icons from website favicon...');
+require('./generate-icons.js');
+
 console.log('🔄 1. Preparing web assets in www/...');
 require('./build-www.js');
 
