@@ -460,33 +460,37 @@ window.updateStatus = async (donationId, newStatus) => {
 };
 
 window.viewLocation = (lat, lng, name) => {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    if (isNaN(latNum) || isNaN(lngNum)) {
+        alert('Location data is invalid or missing for this donation.');
+        return;
+    }
+
     const modal = document.getElementById('map-modal');
-    const mapDiv = document.getElementById('map');
     modal.style.display = 'block';
 
-    if (!window.mapInstance) { // Use global prop to avoid re-init collision issues if any
-        window.mapInstance = L.map('map').setView([lat, lng], 15);
+    if (!window.mapInstance) {
+        window.mapInstance = L.map('map').setView([latNum, lngNum], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(window.mapInstance);
     } else {
-        setTimeout(() => {
-            window.mapInstance.invalidateSize();
-            window.mapInstance.setView([lat, lng], 15);
-        }, 100);
+        window.mapInstance.setView([latNum, lngNum], 15);
     }
 
-    if (window.markerInstance) {
-        window.mapInstance.removeLayer(window.markerInstance);
-    }
-
-    window.markerInstance = L.marker([lat, lng]).addTo(window.mapInstance)
-        .bindPopup(`<b>${name}</b><br>Donation Location`)
-        .openPopup();
-
+    // Always invalidateSize after modal becomes visible
     setTimeout(() => {
         window.mapInstance.invalidateSize();
-    }, 100);
+        window.mapInstance.setView([latNum, lngNum], 15);
+
+        if (window.markerInstance) {
+            window.mapInstance.removeLayer(window.markerInstance);
+        }
+        window.markerInstance = L.marker([latNum, lngNum]).addTo(window.mapInstance)
+            .bindPopup(`<b>${name}</b><br>Donation Location`)
+            .openPopup();
+    }, 150);
 };
 
 // --- UTR & Payment Proof Inspection Modal ---
